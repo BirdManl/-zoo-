@@ -1,0 +1,22 @@
+C:\Users\PC\source\repos\АИС зоопарк\obj\Debug\АИС зоопарк.csproj.AssemblyReference.cache
+C:\Users\PC\source\repos\АИС зоопарк\obj\Debug\WindowsFormsApp1.Form2.resources
+C:\Users\PC\source\repos\АИС зоопарк\obj\Debug\АИС_зоопарк.UserForm.resources
+C:\Users\PC\source\repos\АИС зоопарк\obj\Debug\АИС_зоопарк.AdminForm.resources
+C:\Users\PC\source\repos\АИС зоопарк\obj\Debug\АИС_зоопарк.Properties.Resources.resources
+C:\Users\PC\source\repos\АИС зоопарк\obj\Debug\АИС зоопарк.csproj.GenerateResource.cache
+C:\Users\PC\source\repos\АИС зоопарк\obj\Debug\АИС зоопарк.csproj.CoreCompileInputs.cache
+C:\Users\PC\source\repos\АИС зоопарк\bin\Debug\АИС зоопарк.exe.config
+C:\Users\PC\source\repos\АИС зоопарк\bin\Debug\АИС зоопарк.exe
+C:\Users\PC\source\repos\АИС зоопарк\bin\Debug\АИС зоопарк.pdb
+C:\Users\PC\source\repos\АИС зоопарк\bin\Debug\EntityFramework.dll
+C:\Users\PC\source\repos\АИС зоопарк\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\PC\source\repos\АИС зоопарк\bin\Debug\System.Data.SQLite.dll
+C:\Users\PC\source\repos\АИС зоопарк\bin\Debug\System.Data.SQLite.EF6.dll
+C:\Users\PC\source\repos\АИС зоопарк\bin\Debug\System.Data.SQLite.Linq.dll
+C:\Users\PC\source\repos\АИС зоопарк\bin\Debug\EntityFramework.xml
+C:\Users\PC\source\repos\АИС зоопарк\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\PC\source\repos\АИС зоопарк\bin\Debug\System.Data.SQLite.xml
+C:\Users\PC\source\repos\АИС зоопарк\obj\Debug\___ ____.8A809FD3.Up2Date
+C:\Users\PC\source\repos\АИС зоопарк\obj\Debug\АИС зоопарк.exe
+C:\Users\PC\source\repos\АИС зоопарк\obj\Debug\АИС зоопарк.pdb
+C:\Users\PC\source\repos\АИС зоопарк\obj\Debug\АИС_зоопарк.Form1.resources
