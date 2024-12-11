@@ -2,6 +2,7 @@
 using System.Data.SQLite;
 using System.Linq;
 using System.Windows.Forms;
+using System.IO;
 
 namespace АИС_зоопарк
 {
@@ -187,41 +188,112 @@ namespace АИС_зоопарк
         // Обработчик для кнопки покупки
         private void buttonPurchase_Click(object sender, EventArgs e)
         {
+            // Проверка выбора услуг
             if (checkedListBoxServices.CheckedItems.Count == 0)
             {
                 MessageBox.Show("Пожалуйста, выберите хотя бы одну услугу.");
                 return;
             }
 
+            // Проверка заполнения имени и фамилии
+            if (string.IsNullOrWhiteSpace(textBoxFirstName.Text) || string.IsNullOrWhiteSpace(textBoxLastName.Text))
+            {
+                MessageBox.Show("Пожалуйста, введите своё имя и фамилию.");
+                return;
+            }
+
+            // Сбор данных
+            string firstName = textBoxFirstName.Text.Trim();
+            string lastName = textBoxLastName.Text.Trim();
             string selectedServices = string.Join(", ", checkedListBoxServices.CheckedItems.Cast<ServiceItem>().Select(item => item.Name));
             decimal totalCost = checkedListBoxServices.CheckedItems.Cast<ServiceItem>().Sum(item => item.Price);
+            string purchaseDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
+            // Путь к базе данных
             string dbPath = @"D:\sqlite\Databases\zoo.db";
             string connectionString = $"Data Source={dbPath};Version=3;";
-            string purchaseDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
             try
             {
                 using (SQLiteConnection connection = new SQLiteConnection(connectionString))
                 {
                     connection.Open();
-                    string query = "INSERT INTO Билеты (Услуги, [Суммарная стоимость], [Дата покупки]) " +
-                                   "VALUES (@services, @totalCost, @purchaseDate)";
+
+                    // SQL-запрос для вставки данных
+                    string query = "INSERT INTO Билеты (Услуги, [Суммарная стоимость], [Дата покупки], Имя, Фамилия) " +
+                                   "VALUES (@services, @totalCost, @purchaseDate, @firstName, @lastName); " +
+                                   "SELECT last_insert_rowid();"; // Получаем ID последней вставленной записи
+
                     using (SQLiteCommand command = new SQLiteCommand(query, connection))
                     {
+                        // Параметры для запроса
                         command.Parameters.AddWithValue("@services", selectedServices);
                         command.Parameters.AddWithValue("@totalCost", totalCost);
                         command.Parameters.AddWithValue("@purchaseDate", purchaseDate);
-                        command.ExecuteNonQuery();
+                        command.Parameters.AddWithValue("@firstName", firstName);
+                        command.Parameters.AddWithValue("@lastName", lastName);
+
+                        // Получаем ID вставленной записи
+                        long ticketId = (long)command.ExecuteScalar();
+
+                        // Формируем информацию о билете
+                        string ticketInfo = $"ID Билета: {ticketId}\n" +
+                                            $"Дата покупки: {purchaseDate}\n" +
+                                            $"Услуги: {selectedServices}\n" +
+                                            $"Имя: {firstName}\n" +
+                                            $"Фамилия: {lastName}\n" +
+                                            $"Суммарная стоимость: {totalCost:C}";
+
+                        // Показать информацию о билете с кнопкой для сохранения
+                        DialogResult result = MessageBox.Show(ticketInfo + "\n\nХотите сохранить данные в файл?",
+                                                              "Данные о билете",
+                                                              MessageBoxButtons.YesNo,
+                                                              MessageBoxIcon.Information);
+
+                        // Если пользователь нажал "Yes", сохраняем данные в файл
+                        if (result == DialogResult.Yes)
+                        {
+                            SaveTicketInfoToFile(ticketInfo);
+                        }
                     }
                 }
 
-                MessageBox.Show("Покупка успешно завершена!");
+                // Очистка формы после успешной покупки
+                textBoxFirstName.Clear();
+                textBoxLastName.Clear();
+                for (int i = 0; i < checkedListBoxServices.Items.Count; i++)
+                {
+                    checkedListBoxServices.SetItemChecked(i, false);
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Ошибка при завершении покупки: " + ex.Message);
             }
         }
+
+        // Метод для сохранения данных билета в текстовый файл
+        private void SaveTicketInfoToFile(string ticketInfo)
+        {
+            // Выводим диалоговое окно для выбора пути сохранения файла
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Text files (*.txt)|*.txt";
+            saveFileDialog.DefaultExt = "txt";
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    // Записываем информацию в файл
+                    File.WriteAllText(saveFileDialog.FileName, ticketInfo);
+                    MessageBox.Show("Информация о билете сохранена в файл.");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка при сохранении файла: " + ex.Message);
+                }
+            }
+        }
     }
-}
+    }
+    
