@@ -34,21 +34,23 @@
             // 
             // admin
             // 
-            this.admin.Location = new System.Drawing.Point(179, 72);
+            this.admin.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.admin.Location = new System.Drawing.Point(12, 81);
             this.admin.Name = "admin";
-            this.admin.Size = new System.Drawing.Size(273, 153);
+            this.admin.Size = new System.Drawing.Size(273, 135);
             this.admin.TabIndex = 0;
-            this.admin.Text = "Администратор";
+            this.admin.Text = "Войти как администратор";
             this.admin.UseVisualStyleBackColor = true;
             this.admin.Click += new System.EventHandler(this.admin_Click);
             // 
             // user
             // 
-            this.user.Location = new System.Drawing.Point(179, 255);
+            this.user.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.user.Location = new System.Drawing.Point(12, 255);
             this.user.Name = "user";
             this.user.Size = new System.Drawing.Size(273, 114);
             this.user.TabIndex = 1;
-            this.user.Text = "Пользователь";
+            this.user.Text = "Войти как пользователь";
             this.user.UseVisualStyleBackColor = true;
             this.user.Click += new System.EventHandler(this.user_Click);
             // 
@@ -56,11 +58,12 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.ClientSize = new System.Drawing.Size(314, 450);
             this.Controls.Add(this.user);
             this.Controls.Add(this.admin);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Зоопарк";
             this.ResumeLayout(false);
 
         }

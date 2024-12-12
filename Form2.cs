@@ -4,6 +4,9 @@ using System.Data.SQLite;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using АИС_зоопарк;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolBar;
+using System.Drawing.Drawing2D;
+using System.Drawing;
 
 namespace WindowsFormsApp1
 {
@@ -12,6 +15,25 @@ namespace WindowsFormsApp1
         public Form2()
         {
             InitializeComponent();
+
+            // Увеличиваем шрифт в текстовых полях
+            textBox1.Font = new Font("Arial", 14); // Логин
+            textBox2.Font = new Font("Arial", 14); // Пароль
+            buttonLogin.BackColor = Color.CornflowerBlue; // Устанавливаем яркий фон кнопки
+            buttonLogin.ForeColor = Color.White; // Цвет текста
+            buttonLogin.FlatStyle = FlatStyle.Flat; // Убираем объемный стиль
+            buttonLogin.Font = new Font("Arial", 14, FontStyle.Bold); // Увеличиваем шрифт и делаем его жирным
+
+            // Добавляем эффект при наведении
+            buttonLogin.MouseEnter += (s, e) =>
+            {
+                buttonLogin.BackColor = Color.DodgerBlue; // Цвет при наведении
+            };
+
+            buttonLogin.MouseLeave += (s, e) =>
+            {
+                buttonLogin.BackColor = Color.CornflowerBlue; // Возвращаем оригинальный цвет
+            };
         }
 
         // Обработчик кнопки входа
@@ -23,9 +45,8 @@ namespace WindowsFormsApp1
             // Проверка логина и пароля в базе данных
             if (AuthenticateUser(username, password))
             {
-                MessageBox.Show("Вход выполнен успешно!");
-
                 Form nextForm;
+
                 // Проверка, является ли пользователь администратором
                 if (username.ToLower() == "admin")
                 {
@@ -38,17 +59,21 @@ namespace WindowsFormsApp1
                     nextForm = new UserForm();
                 }
 
-                // Открываем следующую форму и закрываем текущую
-                this.Hide(); // Скрываем текущую форму перед открытием новой
+                // Скрываем текущую форму
+                this.Hide();
 
-                nextForm.ShowDialog(); // Открываем следующую форму как модальное окно
-                this.Close(); // Закрываем текущую форму после закрытия новой
+                // Открываем следующую форму как модальное окно
+                nextForm.ShowDialog();
+
+                // Закрываем текущую форму после закрытия следующей формы
+                this.Close();
             }
             else
             {
                 MessageBox.Show("Неправильный логин или пароль.");
             }
         }
+
 
         // Метод для проверки пользователя в базе данных
         private bool AuthenticateUser(string username, string password)
@@ -84,6 +109,24 @@ namespace WindowsFormsApp1
                 return false;
             }
         }
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            Graphics g = e.Graphics;
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+            // Пример закругления кнопки
+            Rectangle buttonRect = buttonLogin.ClientRectangle;
+            using (GraphicsPath path = new GraphicsPath())
+            {
+                path.AddArc(buttonRect.Left, buttonRect.Top, 20, 20, 180, 90);
+                path.AddArc(buttonRect.Right - 20, buttonRect.Top, 20, 20, 270, 90);
+                path.AddArc(buttonRect.Right - 20, buttonRect.Bottom - 20, 20, 20, 0, 90);
+                path.AddArc(buttonRect.Left, buttonRect.Bottom - 20, 20, 20, 90, 90);
+                path.CloseFigure();
+                buttonLogin.Region = new Region(path);
+            }
+        }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
@@ -93,6 +136,11 @@ namespace WindowsFormsApp1
         private void Form2_Load(object sender, EventArgs e)
         {
             // Этот метод можно оставить пустым, если он не нужен
+        }
+
+        private void Form2_Load_1(object sender, EventArgs e)
+        {
+
         }
     }
 }

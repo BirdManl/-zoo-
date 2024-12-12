@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Data.SQLite;
+using System.Linq;
 using System.Windows.Forms;
-using System.Xml.Linq;
 
 namespace АИС_зоопарк
 {
@@ -11,25 +13,105 @@ namespace АИС_зоопарк
         public AdminForm()
         {
             InitializeComponent();
+
+            // Инициализация ComboBox и загрузка данных
             InitializeGenderComboBox();
             LoadWorkers();
             LoadAnimals();
             LoadEmployees();
-            InitializeEnclosureTypeComboBox(); // Инициализация списка для выбора типа вольера
-            LoadEnclosures(); // Загрузка данных о вольерах
-            LoadServices(); // Вызов метода здесь должен работать, если метод определен внутри класса AdminForm
-            LoadTickets(); // Вызываем метод загрузки билетов 
+            InitializeEnclosureTypeComboBox();
+            LoadEnclosures();
+            LoadServices();
+            LoadTickets();
+            LoadArchivedTickets();
+            LoadPositions();
+            txtSearchDay.KeyPress += txtSearchDate_KeyPress;
+            dataGridViewEnclosures.SelectionChanged += dataGridViewEnclosures_SelectionChanged;
+            dataGridViewServices.SelectionChanged += dataGridViewServices_SelectionChanged;
+            this.Load += Form_Load;
+
+            // Инициализация семейства
+            textBoxFamily.Items.AddRange(familyToClassesMap.Keys.ToArray());
+            if (textBoxFamily.Items.Count > 0)
+            {
+                isUpdating = true;
+                textBoxFamily.SelectedIndex = 0;
+                isUpdating = false;
+            }
+
+            // Привязка событий
+            textBoxFamily.SelectedIndexChanged += textBoxFamily_SelectedIndexChanged;
+            textBoxSpecies.SelectedIndexChanged += textBoxSpecies_SelectedIndexChanged;
             dataGridViewAnimals.CellEndEdit += dataGridViewAnimals_CellEndEdit;
         }
+       
+        private void Form_Load(object sender, EventArgs e)
+        {
+            // Заполняем ComboBox "Семейство" (textBoxFamily)
+            if (textBoxFamily != null)
+            {
+                textBoxFamily.Items.Clear();
+                textBoxFamily.Items.AddRange(new string[]
+                {
+            "Кошачьи",
+            "Собачьи",
+            "Грызуновые",
+            "Приматы",
+            "Парнокопытные",
+            "Птицы",
+            "Рептилии",
+            "Рыбы",
+            "Насекомые",
+            "Млекопитающие",
+            "Земноводные",
+            "Членистоногие"
+                });
 
-        // Метод для инициализации comboBoxGender
+                if (textBoxFamily.Items.Count > 0)
+                {
+                    textBoxFamily.SelectedIndex = 0; // Устанавливаем первый элемент
+                }
+            }
+
+            // Заполняем ComboBox "Класс" (textBoxSpecies)
+            if (textBoxSpecies != null)
+            {
+                textBoxSpecies.Items.Clear();
+                textBoxSpecies.Items.AddRange(new string[]
+                {
+            "Белый тигр",
+            "Лев обычный",
+            "Амурский тигр",
+            "Императорский пингвин",
+            "Канадский волк",
+            "Горная горилла",
+            "Алый ара",
+            "Фламинго",
+            "Крокодил нильский",
+            "Игуана зелёная",
+            "Белый медведь",
+            "Гигантская панда"
+                });
+
+                if (textBoxSpecies.Items.Count > 0)
+                {
+                    textBoxSpecies.SelectedIndex = 0; // Устанавливаем первый элемент
+                }
+            }
+
+            // Привязываем обработчики событий
+            textBoxFamily.SelectedIndexChanged += textBoxFamily_SelectedIndexChanged;
+            textBoxSpecies.SelectedIndexChanged += textBoxSpecies_SelectedIndexChanged;
+        }
+
+
+        // Метод для инициализации ComboBox для пола
         private void InitializeGenderComboBox()
         {
             comboBoxGender.Items.Add("Самец");
             comboBoxGender.Items.Add("Самка");
             comboBoxGender.SelectedIndex = 0;
         }
-
         // Метод для загрузки списка сотрудников в comboBoxWorker
         private void LoadWorkers()
         {
@@ -86,27 +168,60 @@ namespace АИС_зоопарк
                 {
                     connection.Open();
 
-                    // Запрос для загрузки данных о животных
-                    string query = "SELECT [Номер ветеринарной карты], Название, Семейство, Класс, Возраст, Пол, [Страна обитания], Масса, Высота, [Продолжительность жизни], [Сотрудник ответственный за животное] FROM Животные";
+                    // Обновленный запрос с правильным названием колонки
+                    string query = @"
+                SELECT 
+                    Животные.[Номер ветеринарной карты], 
+                    Животные.[Кличка], 
+                    Животные.[Семейство], 
+                    Животные.[Класс], 
+                    Животные.[Возраст], 
+                    Животные.[Пол], 
+                    Животные.[Страна обитания], 
+                    Животные.[Масса], 
+                    Животные.[Высота], 
+                    Животные.[Продолжительность жизни], 
+                    Сотрудники.[ФИО] AS 'Сотрудник ответственный за животное'
+                FROM 
+                    Животные
+                LEFT JOIN 
+                    Сотрудники
+                ON 
+                    Животные.[Сотрудник ответственный за животное] = Сотрудники.[ID Работника]";
+
                     using (SQLiteDataAdapter adapter = new SQLiteDataAdapter(query, connection))
                     {
                         DataTable dataTable = new DataTable();
                         adapter.Fill(dataTable);
+
+                        // Добавляем колонку с порядковыми номерами
+                        dataTable.Columns.Add("№", typeof(int)).SetOrdinal(0);
+                        for (int i = 0; i < dataTable.Rows.Count; i++)
+                        {
+                            dataTable.Rows[i]["№"] = i + 1; // Порядковый номер строки
+                        }
+
                         dataGridViewAnimals.DataSource = dataTable;
+
+                        // Скрываем колонку с первичным ключом
+                        if (dataGridViewAnimals.Columns.Contains("Номер ветеринарной карты"))
+                        {
+                            dataGridViewAnimals.Columns["Номер ветеринарной карты"].Visible = false;
+                        }
                     }
 
                     // Загружаем животных в comboBoxEnclosureAnimal
-                    string animalQuery = "SELECT [Номер ветеринарной карты], Название FROM Животные";
+                    string animalQuery = "SELECT Кличка FROM Животные";
                     using (SQLiteCommand command = new SQLiteCommand(animalQuery, connection))
                     using (SQLiteDataReader reader = command.ExecuteReader())
                     {
+                        int index = 1;
                         while (reader.Read())
                         {
-                            string animalName = reader["Название"].ToString();
-                            int animalId = Convert.ToInt32(reader["Номер ветеринарной карты"]);
+                            string animalName = reader["Кличка"].ToString();
 
-                            // Добавляем животное в comboBoxEnclosureAnimal с использованием ComboBoxItem
-                            comboBoxEnclosureAnimal.Items.Add(new ComboBoxItem(animalName, animalId));
+                            // Добавляем животное в comboBoxEnclosureAnimal
+                            comboBoxEnclosureAnimal.Items.Add(new ComboBoxItem(animalName, index++));
                         }
                     }
                 }
@@ -118,13 +233,26 @@ namespace АИС_зоопарк
         }
 
 
+
+
         private void InitializeEnclosureTypeComboBox()
         {
-            comboBoxEnclosureType.Items.Add("Травоядное");
-            comboBoxEnclosureType.Items.Add("Хищник");
-            comboBoxEnclosureType.Items.Add("Всеядное");
-            comboBoxEnclosureType.SelectedIndex = 0; // Установим первый элемент по умолчанию
+            comboBoxEnclosureType.Items.Clear();
+            comboBoxEnclosureType.Items.AddRange(enclosureTypeToAllowedClasses.Keys.ToArray());
         }
+
+        private Dictionary<string, List<string>> enclosureTypeToAllowedClasses = new Dictionary<string, List<string>>()
+{
+    { "Хищник", new List<string> { "Кошачьи", "Собачьи", "Рептилии" } },
+    { "Травоядное", new List<string> { "Парнокопытные", "Грызуновые" } },
+    { "Птицы", new List<string> { "Птицы" } },
+    { "Рыбы", new List<string> { "Рыбы" } },
+    { "Земноводные", new List<string> { "Земноводные" } },
+    { "Насекомые", new List<string> { "Насекомые" } },
+    { "Членистоногие", new List<string> { "Членистоногие" } },
+    { "Приматы", new List<string> { "Приматы" } },
+    { "Млекопитающие", new List<string> { "Млекопитающие" } },
+};
 
         private void ClearServiceFields()
         {
@@ -144,8 +272,16 @@ namespace АИС_зоопарк
                 using (SQLiteConnection connection = new SQLiteConnection(connectionString))
                 {
                     connection.Open();
-                    // Обновленный запрос с учетом правильных имен столбцов
-                    string query = "SELECT [Номер вольера], [Вид вольера], [Корм нужный в вольере], [Сотрудник ответственный за вольер], [Животное в вольере] FROM Вольеры";
+                    // Correct query with accurate column names and a subquery to fetch the employee's name
+                    string query = @"
+            SELECT 
+                
+                [Вид_вольера] AS 'Вид вольера', 
+                [Корм нужный в вольере] AS 'Корм', 
+                (SELECT ФИО FROM Сотрудники WHERE [ID Работника] = Вольеры.[Сотрудник ответственный за вольер]) AS 'ФИО Сотрудника', 
+                [Животное_в_вольере] AS 'Животное'
+            FROM Вольеры"; ;
+
                     using (SQLiteDataAdapter adapter = new SQLiteDataAdapter(query, connection))
                     {
                         DataTable dataTable = new DataTable();
@@ -153,6 +289,35 @@ namespace АИС_зоопарк
                         dataGridViewEnclosures.DataSource = dataTable;
                     }
                 }
+
+                // Remove unnecessary columns if they exist
+                if (dataGridViewEnclosures.Columns.Contains("Сотрудник"))
+                {
+                    dataGridViewEnclosures.Columns.Remove("Сотрудник");
+                }
+
+                if (dataGridViewEnclosures.Columns.Contains("ID"))
+                {
+                    dataGridViewEnclosures.Columns["ID"].Visible = false;
+                }
+                // Add a new column for row numbers
+                if (!dataGridViewEnclosures.Columns.Contains("ColumnRowNumber"))
+                {
+                    DataGridViewTextBoxColumn rowNumberColumn = new DataGridViewTextBoxColumn
+                    {
+                        Name = "ColumnRowNumber",
+                        HeaderText = "№",
+                        ReadOnly = true
+                    };
+                    dataGridViewEnclosures.Columns.Insert(0, rowNumberColumn); // Insert at the first position
+                }
+
+                // Update the row numbers initially
+                UpdateRowNumbersEnclosures();
+
+                // Subscribe to row-added and row-removed events for dynamic updates
+                dataGridViewEnclosures.RowsAdded += (s, ev) => UpdateRowNumbersEnclosures();
+                dataGridViewEnclosures.RowsRemoved += (s, ev) => UpdateRowNumbersEnclosures();
             }
             catch (Exception ex)
             {
@@ -160,38 +325,20 @@ namespace АИС_зоопарк
             }
         }
 
+        // Helper method to update row numbers
+        private void UpdateRowNumbersEnclosures()
+        {
+            for (int i = 0; i < dataGridViewEnclosures.Rows.Count; i++)
+            {
+                dataGridViewEnclosures.Rows[i].Cells["ColumnRowNumber"].Value = i + 1;
+            }
+        }
+
+
 
         // Обработчик события CellEndEdit для сохранения изменений в базе данных после редактирования ячейки
         private void dataGridViewAnimals_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            string dbPath = @"D:\sqlite\Databases\zoo.db";
-            string connectionString = $"Data Source={dbPath};Version=3;";
-
-            // Используем "Номер ветеринарной карты" вместо "ID"
-            var id = dataGridViewAnimals.Rows[e.RowIndex].Cells["Номер ветеринарной карты"].Value;
-            var columnName = dataGridViewAnimals.Columns[e.ColumnIndex].Name;
-            var newValue = dataGridViewAnimals.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
-
-            try
-            {
-                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
-                {
-                    connection.Open();
-                    // Используем "Номер ветеринарной карты" в запросе
-                    string query = $"UPDATE Животные SET {columnName} = @newValue WHERE [Номер ветеринарной карты] = @id";
-
-                    using (SQLiteCommand command = new SQLiteCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@newValue", newValue);
-                        command.Parameters.AddWithValue("@id", id);
-                        command.ExecuteNonQuery();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка при обновлении данных: " + ex.Message);
-            }
 
         }
         private void LoadEmployees()
@@ -204,12 +351,32 @@ namespace АИС_зоопарк
                 using (SQLiteConnection connection = new SQLiteConnection(connectionString))
                 {
                     connection.Open();
-                    string query = "SELECT [ID Работника], ФИО, Возраст, [Стаж работы], Зарплата, Должность FROM Сотрудники";
-                    using (SQLiteDataAdapter adapter = new SQLiteDataAdapter(query, connection))
+
+                    // Запрос для заполнения DataGridView
+                    string queryForGridView = "SELECT [ID Работника], ФИО, Возраст, [Стаж работы], Зарплата, Должность FROM Сотрудники";
+                    using (SQLiteDataAdapter adapter = new SQLiteDataAdapter(queryForGridView, connection))
                     {
                         DataTable dataTable = new DataTable();
                         adapter.Fill(dataTable);
                         dataGridViewEmployees.DataSource = dataTable;
+                    }
+
+                    // Запрос для загрузки сотрудников в ComboBox
+                    string queryForComboBox = "SELECT ФИО FROM Сотрудники";
+                    using (SQLiteCommand command = new SQLiteCommand(queryForComboBox, connection))
+                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    {
+                        comboBoxEmployee.Items.Clear(); // Очищаем ComboBox перед заполнением
+
+                        while (reader.Read())
+                        {
+                            comboBoxEmployee.Items.Add(reader["ФИО"].ToString()); // Добавляем ФИО сотрудников
+                        }
+
+                        if (comboBoxEmployee.Items.Count > 0)
+                        {
+                            comboBoxEmployee.SelectedIndex = 0; // Устанавливаем первый элемент по умолчанию
+                        }
                     }
                 }
             }
@@ -218,6 +385,7 @@ namespace АИС_зоопарк
                 MessageBox.Show("Ошибка при загрузке данных о сотрудниках: " + ex.Message);
             }
         }
+
 
         // Обработчик кнопки добавления животного
         private void buttonAddAnimal_Click(object sender, EventArgs e)
@@ -237,8 +405,8 @@ namespace АИС_зоопарк
             // Проверка полей на корректность
             bool ageParsed = int.TryParse(textBoxAge.Text, out age);
             bool weightParsed = float.TryParse(textBoxWeight.Text, out weight);
-            bool heightParsed = float.TryParse(textBoxLifetime.Text, out height);
-            bool lifetimeParsed = int.TryParse(textBoxHeight.Text, out lifetime);
+            bool heightParsed = float.TryParse(textBoxHeight.Text, out height);
+            bool lifetimeParsed = int.TryParse(textBoxLifetime.Text, out lifetime);
 
             if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(family) || string.IsNullOrWhiteSpace(species) ||
                 string.IsNullOrWhiteSpace(country) || string.IsNullOrWhiteSpace(gender) || string.IsNullOrWhiteSpace(workerId) ||
@@ -260,7 +428,6 @@ namespace АИС_зоопарк
                 MessageBox.Show("Ошибка при добавлении животного: " + ex.Message);
             }
         }
-
         // Обработчик кнопки добавления сотрудника
         private void buttonAddEmployee_Click(object sender, EventArgs e)
         {
@@ -271,7 +438,7 @@ namespace АИС_зоопарк
             bool experienceParsed = int.TryParse(textBoxEmployeeExperience.Text, out experience);
             decimal salary;
             bool salaryParsed = decimal.TryParse(textBoxEmployeeSalary.Text, out salary);
-            string specialty = textBoxEmployeeSpecialty.Text;
+            string specialty = comboBoxPosition.Text;
 
             if (string.IsNullOrWhiteSpace(name) || !ageParsed || !experienceParsed || !salaryParsed || string.IsNullOrWhiteSpace(specialty))
             {
@@ -304,7 +471,7 @@ namespace АИС_зоопарк
             {
                 connection.Open();
 
-                string query = "INSERT INTO Животные (Название, Семейство, Класс, Возраст, Пол, [Страна обитания], Масса, Высота, [Продолжительность жизни], [Сотрудник ответственный за животное]) " +
+                string query = "INSERT INTO Животные (Кличка, Семейство, Класс, Возраст, Пол, [Страна обитания], Масса, Высота, [Продолжительность жизни], [Сотрудник ответственный за животное]) " +
                                "VALUES (@name, @family, @species, @age, @gender, @country, @weight, @height, @lifetime, @workerId)";
 
                 using (SQLiteCommand command = new SQLiteCommand(query, connection))
@@ -353,15 +520,15 @@ namespace АИС_зоопарк
         private void ClearAnimalFields()
         {
             textBoxAnimalName.Clear();
-            textBoxFamily.Clear();
-            textBoxSpecies.Clear();
+            textBoxFamily.SelectedIndex = 0;
+            textBoxSpecies.SelectedIndex = 0;
             textBoxAge.Clear();
             comboBoxGender.SelectedIndex = 0;
             textBoxCountry.Clear();
             textBoxWeight.Clear();
             textBoxLifetime.Clear();
             textBoxHeight.Clear();
-            comboBoxWorker.SelectedIndex = -1;
+            comboBoxWorker.SelectedIndex = 0;
         }
 
         // Очистка полей после добавления сотрудника
@@ -371,7 +538,7 @@ namespace АИС_зоопарк
             textBoxEmployeeAge.Clear();
             textBoxEmployeeExperience.Clear();
             textBoxEmployeeSalary.Clear();
-            textBoxEmployeeSpecialty.Clear();
+            comboBoxPosition.SelectedIndex = -1;
         }
 
         // Вспомогательный класс для отображения сотрудников в comboBoxWorker
@@ -403,7 +570,7 @@ namespace АИС_зоопарк
 
             // Получаем значение идентификатора из выбранной строки
             var selectedRow = dataGridViewAnimals.SelectedRows[0];
-            var animalId = selectedRow.Cells["Номер ветеринарной карты"].Value;
+            var animalId = selectedRow.Cells["№"].Value; // Порядковый номер строки
 
             // Подтверждение удаления
             var confirmResult = MessageBox.Show("Вы уверены, что хотите удалить выбранное животное?",
@@ -489,6 +656,7 @@ namespace АИС_зоопарк
                 MessageBox.Show("Ошибка при удалении сотрудника: " + ex.Message);
             }
         }
+
         private void LoadServices()
         {
             string dbPath = @"D:\sqlite\Databases\zoo.db";
@@ -516,17 +684,38 @@ namespace АИС_зоопарк
 
         private void buttonAddEnclosure_Click(object sender, EventArgs e)
         {
+            // Считываем значения из формы
             string enclosureType = comboBoxEnclosureType.SelectedItem?.ToString();
             string food = textBoxEnclosureFood.Text.Trim();
             string workerId = (comboBoxEnclosureWorker.SelectedItem as ComboBoxItem)?.Id.ToString();
             string animalInEnclosure = (comboBoxEnclosureAnimal.SelectedItem as ComboBoxItem)?.Name;
 
-            if (string.IsNullOrWhiteSpace(enclosureType) || string.IsNullOrWhiteSpace(food) || string.IsNullOrWhiteSpace(workerId) || string.IsNullOrWhiteSpace(animalInEnclosure))
+            // Проверяем заполненность всех полей
+            if (string.IsNullOrWhiteSpace(enclosureType) ||
+                string.IsNullOrWhiteSpace(food) ||
+                string.IsNullOrWhiteSpace(workerId) ||
+                string.IsNullOrWhiteSpace(animalInEnclosure))
             {
                 MessageBox.Show("Пожалуйста, заполните все обязательные поля.");
                 return;
             }
 
+            // Получаем класс животного из базы данных
+            string animalClass = GetAnimalClassFromDatabase(animalInEnclosure);
+            if (string.IsNullOrEmpty(animalClass))
+            {
+                MessageBox.Show($"Класс животного '{animalInEnclosure}' не найден в базе данных.");
+                return;
+            }
+
+            // Проверяем совместимость животного с типом вольера
+            if (!IsAnimalCompatibleWithEnclosure(animalClass, enclosureType))
+            {
+                MessageBox.Show($"Животное '{animalInEnclosure}' из класса '{animalClass}' не совместимо с вольером типа '{enclosureType}'.");
+                return;
+            }
+
+            // Добавляем новый вольер в базу данных
             string dbPath = @"D:\sqlite\Databases\zoo.db";
             string connectionString = $"Data Source={dbPath};Version=3;";
 
@@ -535,14 +724,14 @@ namespace АИС_зоопарк
                 using (SQLiteConnection connection = new SQLiteConnection(connectionString))
                 {
                     connection.Open();
-                    string query = "INSERT INTO Вольеры ([Вид вольера], [Корм нужный в вольере], [Сотрудник ответственный за вольер], [Животное в вольере]) " +
+                    string query = "INSERT INTO Вольеры ([Вид_вольера], [Корм нужный в вольере], [Сотрудник ответственный за вольер], [Животное_в_вольере]) " +
                                    "VALUES (@enclosureType, @food, @workerId, @animalInEnclosure)";
                     using (SQLiteCommand command = new SQLiteCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@enclosureType", enclosureType);
                         command.Parameters.AddWithValue("@food", food);
                         command.Parameters.AddWithValue("@workerId", workerId);
-                        command.Parameters.AddWithValue("@animalInEnclosure", animalInEnclosure); // Добавляем животное в запрос
+                        command.Parameters.AddWithValue("@animalInEnclosure", animalInEnclosure);
 
                         command.ExecuteNonQuery();
                     }
@@ -558,7 +747,7 @@ namespace АИС_зоопарк
         }
         private void LoadTickets()
         {
-            string dbPath = @"D:\sqlite\Databases\zoo.db";
+            string dbPath = @"D:\sqlite\Databases\zoo.db"; // Укажите путь к базе данных
             string connectionString = $"Data Source={dbPath};Version=3;";
 
             try
@@ -566,7 +755,17 @@ namespace АИС_зоопарк
                 using (SQLiteConnection connection = new SQLiteConnection(connectionString))
                 {
                     connection.Open();
-                    string query = "SELECT [ID Билета], Услуги, [Суммарная стоимость], [Дата покупки], [Сотрудник, выдавший билет] FROM Билеты";
+                    // Обновленный SQL-запрос с добавлением столбцов "Имя" и "Фамилия"
+                    string query = @"
+                SELECT  
+                    Услуги, 
+                    [Суммарная стоимость], 
+                    [Дата покупки], 
+                    [Сотрудник, выдавший билет],
+                    Имя AS 'Имя покупателя',
+                    Фамилия AS 'Фамилия покупателя'
+                FROM Билеты";
+
                     using (SQLiteDataAdapter adapter = new SQLiteDataAdapter(query, connection))
                     {
                         DataTable dataTable = new DataTable();
@@ -574,12 +773,44 @@ namespace АИС_зоопарк
                         dataGridViewTickets.DataSource = dataTable;
                     }
                 }
+
+                // Удаление колонки "ID Билета" (если она есть)
+                if (dataGridViewTickets.Columns.Contains("ID Билета"))
+                {
+                    dataGridViewTickets.Columns.Remove("ID Билета");
+                }
+
+                // Добавление колонки для порядковых номеров
+                DataGridViewTextBoxColumn rowNumberColumn = new DataGridViewTextBoxColumn
+                {
+                    Name = "ColumnRowNumber",
+                    HeaderText = "№",
+                    ReadOnly = true
+                };
+                dataGridViewTickets.Columns.Insert(0, rowNumberColumn); // Вставляем колонку на первое место
+
+                // Устанавливаем начальные порядковые номера
+                UpdateRowNumbers();
+
+                // Подписываемся на события для динамического обновления
+                dataGridViewTickets.RowsAdded += (s, ev) => UpdateRowNumbers();
+                dataGridViewTickets.RowsRemoved += (s, ev) => UpdateRowNumbers();
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Ошибка при загрузке данных о билетах: " + ex.Message);
             }
         }
+
+        private void UpdateRowNumbers()
+        {
+            // Перебираем строки и устанавливаем порядковый номер
+            for (int i = 0; i < dataGridViewTickets.Rows.Count; i++)
+            {
+                dataGridViewTickets.Rows[i].Cells["ColumnRowNumber"].Value = (i + 1).ToString();
+            }
+        }
+
 
         private void buttonAddService_Click(object sender, EventArgs e)
         {
@@ -668,7 +899,44 @@ namespace АИС_зоопарк
                 MessageBox.Show("Ошибка при удалении услуги: " + ex.Message);
             }
         }
-       
+        // Метод для загрузки данных из архива в DataGridView
+        private void LoadArchivedTickets()
+        {
+            string dbPath = @"D:\sqlite\Databases\zoo.db"; // Убедитесь, что путь правильный
+            string connectionString = $"Data Source={dbPath};Version=3;";
+
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+                    string query = "SELECT [ID Билета], Услуги, [Суммарная стоимость], [Дата покупки], Имя, Фамилия, [Дата удаления] FROM Архив";
+
+                    using (SQLiteDataAdapter dataAdapter = new SQLiteDataAdapter(query, connection))
+                    {
+                        DataTable dataTable = new DataTable();
+                        dataAdapter.Fill(dataTable);
+
+                        // Проверка: если DataTable пустая
+                        if (dataTable.Rows.Count == 0)
+                        {
+                            MessageBox.Show("Нет данных в архиве.");
+                        }
+
+                        // Привязываем данные к DataGridView
+                        dataGridViewArchive.DataSource = dataTable;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при загрузке данных из архива: " + ex.Message);
+            }
+        }
+
+
+
+
         private void buttonDeleteTicket_Click(object sender, EventArgs e)
         {
             // Проверяем, выбрана ли строка для удаления
@@ -683,7 +951,7 @@ namespace АИС_зоопарк
             var ticketId = selectedRow.Cells["ID Билета"].Value;
 
             // Подтверждение удаления
-            var confirmResult = MessageBox.Show("Вы уверены, что хотите удалить выбранный билет?",
+            var confirmResult = MessageBox.Show("Вы уверены, что хотите удалить выбранный билет? Билет будет перемещен в архив.",
                                                  "Подтверждение удаления",
                                                  MessageBoxButtons.YesNo);
             if (confirmResult != DialogResult.Yes)
@@ -699,16 +967,33 @@ namespace АИС_зоопарк
                 using (SQLiteConnection connection = new SQLiteConnection(connectionString))
                 {
                     connection.Open();
-                    string query = "DELETE FROM Билеты WHERE [ID Билета] = @ticketId";
-                    using (SQLiteCommand command = new SQLiteCommand(query, connection))
+
+                    // Запрос для копирования данных в архив
+                    string queryArchive = "INSERT INTO Архив ([ID Билета], Услуги, [Суммарная стоимость], [Дата покупки], Имя, Фамилия, [Дата удаления]) " +
+                                          "SELECT [ID Билета], Услуги, [Суммарная стоимость], [Дата покупки], Имя, Фамилия, CURRENT_TIMESTAMP " +
+                                          "FROM Билеты WHERE [ID Билета] = @ticketId";
+
+                    using (SQLiteCommand commandArchive = new SQLiteCommand(queryArchive, connection))
                     {
-                        command.Parameters.AddWithValue("@ticketId", ticketId);
-                        command.ExecuteNonQuery();
+                        commandArchive.Parameters.AddWithValue("@ticketId", ticketId);
+                        commandArchive.ExecuteNonQuery(); // Копируем запись в архив
+                    }
+
+                    // Запрос для удаления билета из таблицы Билеты
+                    string queryDelete = "DELETE FROM Билеты WHERE [ID Билета] = @ticketId";
+
+                    using (SQLiteCommand commandDelete = new SQLiteCommand(queryDelete, connection))
+                    {
+                        commandDelete.Parameters.AddWithValue("@ticketId", ticketId);
+                        commandDelete.ExecuteNonQuery(); // Удаляем билет
                     }
                 }
 
-                MessageBox.Show("Билет успешно удален.");
-                LoadTickets(); // Обновляем таблицу билетов после удаления
+                MessageBox.Show("Билет успешно перемещен в архив и удален из таблицы.");
+
+                // Обновляем таблицу билетов и таблицу архива
+                LoadTickets();          // Обновляем таблицу билетов
+                LoadArchivedTickets();  // Обновляем таблицу архива
             }
             catch (Exception ex)
             {
@@ -722,7 +1007,7 @@ namespace АИС_зоопарк
 
             if (string.IsNullOrEmpty(searchTerm))
             {
-                MessageBox.Show("Введите название животного для поиска!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Введите Кличку животного для поиска!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -735,11 +1020,28 @@ namespace АИС_зоопарк
                 {
                     connection.Open();
 
-                    // SQL-запрос с COLLATE NOCASE для игнорирования регистра
+                    // SQL-запрос с LIKE для поиска по кличке
                     string query = @"
-                SELECT *
-                FROM Животные
-                WHERE Название LIKE @searchTerm COLLATE NOCASE";
+                SELECT 
+                    Животные.[Номер ветеринарной карты], 
+                    Животные.[Кличка], 
+                    Животные.[Семейство], 
+                    Животные.[Класс], 
+                    Животные.[Возраст], 
+                    Животные.[Пол], 
+                    Животные.[Страна обитания], 
+                    Животные.[Масса], 
+                    Животные.[Высота], 
+                    Животные.[Продолжительность жизни], 
+                    Сотрудники.[ФИО] AS 'Сотрудник ответственный за животное'
+                FROM 
+                    Животные
+                LEFT JOIN 
+                    Сотрудники
+                ON 
+                    Животные.[Сотрудник ответственный за животное] = Сотрудники.[ID Работника]
+                WHERE 
+                    Животные.[Кличка] LIKE @searchTerm COLLATE NOCASE";
 
                     using (SQLiteCommand command = new SQLiteCommand(query, connection))
                     {
@@ -750,12 +1052,29 @@ namespace АИС_зоопарк
                         DataTable results = new DataTable();
                         adapter.Fill(results);
 
+                        // Если есть результаты, добавляем порядковые номера
+                        if (results.Rows.Count > 0)
+                        {
+                            if (!results.Columns.Contains("№"))
+                            {
+                                results.Columns.Add("№", typeof(int));
+                            }
+
+                            for (int i = 0; i < results.Rows.Count; i++)
+                            {
+                                results.Rows[i]["№"] = i + 1; // Добавляем порядковые номера
+                            }
+
+                            // Перемещаем колонку "№" в начало
+                            results.Columns["№"].SetOrdinal(0);
+                        }
+
                         // Обновляем DataGridView с результатами
                         dataGridViewAnimals.DataSource = results;
 
                         if (results.Rows.Count == 0)
                         {
-                            MessageBox.Show("Животное с таким названием не найдено.", "Результаты поиска", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show("Животное с такой Кличкой не найдено.", "Результаты поиска", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                     }
                 }
@@ -765,20 +1084,7 @@ namespace АИС_зоопарк
                 MessageBox.Show($"Ошибка при поиске: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        private string FormatEmployeeName(string fullName)
-        {
-            // Разделяем имя на части
-            var parts = fullName.Split(' ');
 
-            if (parts.Length == 3)
-            {
-                // Форматируем как "Фамилия И.О."
-                return $"{parts[0]} {parts[1][0]}.{parts[2][0]}.";
-            }
-
-            // Если формат имени некорректен, возвращаем оригинальное имя
-            return fullName;
-        }
 
         private void buttonUpdate_Click(object sender, EventArgs e)
         {
@@ -792,7 +1098,7 @@ namespace АИС_зоопарк
             DataGridViewRow selectedRow = dataGridViewAnimals.SelectedRows[0];
 
             // Заполняем текстовые поля данными из выбранной строки
-            textBoxAnimalName.Text = selectedRow.Cells["Название"].Value?.ToString() ?? "";
+            textBoxAnimalName.Text = selectedRow.Cells["Кличка"].Value?.ToString() ?? "";
             textBoxFamily.Text = selectedRow.Cells["Семейство"].Value?.ToString() ?? "";
             textBoxSpecies.Text = selectedRow.Cells["Класс"].Value?.ToString() ?? "";
             textBoxAge.Text = selectedRow.Cells["Возраст"].Value?.ToString() ?? "";
@@ -801,7 +1107,9 @@ namespace АИС_зоопарк
             textBoxHeight.Text = selectedRow.Cells["Высота"].Value?.ToString() ?? "";
             textBoxLifetime.Text = selectedRow.Cells["Продолжительность жизни"].Value?.ToString() ?? "";
 
-            MessageBox.Show("Данные строки загружены в текстовые поля.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            // Заносим работника в comboBoxWorker
+            string workerName = selectedRow.Cells["Сотрудник ответственный за животное"].Value?.ToString() ?? "";
+            comboBoxWorker.SelectedItem = comboBoxWorker.Items.Cast<object>().FirstOrDefault(item => item.ToString() == workerName);
         }
         private void RefreshDataGridView()
         {
@@ -842,19 +1150,23 @@ namespace АИС_зоопарк
                 return;
             }
 
-            // Получаем ID записи из выбранной строки
+            // Получаем выбранную строку
             DataGridViewRow selectedRow = dataGridViewAnimals.SelectedRows[0];
-            int id = Convert.ToInt32(selectedRow.Cells["Номер ветеринарной карты"].Value); // Предполагается, что это первичный ключ
 
-            // Проверка на заполненность текстовых полей
-            if (string.IsNullOrEmpty(textBoxAnimalName.Text) || string.IsNullOrEmpty(textBoxFamily.Text) ||
-                string.IsNullOrEmpty(textBoxSpecies.Text) || string.IsNullOrEmpty(textBoxAge.Text))
+            // Получаем значение скрытого первичного ключа
+            int id = Convert.ToInt32(selectedRow.Cells["Номер ветеринарной карты"].Value);
+
+            // Проверяем заполненность полей
+            if (string.IsNullOrWhiteSpace(textBoxAnimalName.Text) ||
+                string.IsNullOrWhiteSpace(textBoxSpecies.Text) ||
+                string.IsNullOrWhiteSpace(textBoxFamily.Text) ||
+                string.IsNullOrWhiteSpace(textBoxAge.Text))
             {
                 MessageBox.Show("Пожалуйста, заполните все обязательные поля!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            string dbPath = @"D:\sqlite\Databases\zoo.db"; // Укажите путь к базе данных
+            string dbPath = @"D:\sqlite\Databases\zoo.db";
             string connectionString = $"Data Source={dbPath};Version=3;";
 
             try
@@ -866,15 +1178,13 @@ namespace АИС_зоопарк
                     // Обновляем запись в базе данных
                     string query = @"
                 UPDATE Животные
-                SET Название = @name,
-                    Семейство = @family,
-                    Класс = @species,
-                    Возраст = @age,
-                    [Страна обитания] = @country,
-                    Масса = @weight,
-                    Высота = @height,
-                    [Продолжительность жизни] = @lifetime
-                WHERE [Номер ветеринарной карты] = @id";
+                SET 
+                    Кличка = @name, 
+                    Семейство = @family, 
+                    Класс = @species, 
+                    Возраст = @age
+                WHERE 
+                    [Номер ветеринарной карты] = @id";
 
                     using (SQLiteCommand command = new SQLiteCommand(query, connection))
                     {
@@ -882,29 +1192,26 @@ namespace АИС_зоопарк
                         command.Parameters.AddWithValue("@family", textBoxFamily.Text);
                         command.Parameters.AddWithValue("@species", textBoxSpecies.Text);
                         command.Parameters.AddWithValue("@age", Convert.ToInt32(textBoxAge.Text));
-                        command.Parameters.AddWithValue("@country", textBoxCountry.Text);
-                        command.Parameters.AddWithValue("@weight", Convert.ToDouble(textBoxWeight.Text));
-                        command.Parameters.AddWithValue("@height", Convert.ToDouble(textBoxHeight.Text));
-                        command.Parameters.AddWithValue("@lifetime", Convert.ToInt32(textBoxLifetime.Text));
                         command.Parameters.AddWithValue("@id", id);
 
                         command.ExecuteNonQuery();
                     }
                 }
 
-                // Обновляем DataGridView после изменений
+                // Обновляем таблицу
+                LoadAnimals();
                 MessageBox.Show("Изменения успешно сохранены!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                RefreshDataGridView();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при сохранении изменений: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Ошибка при сохранении изменений: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+
         private void ResetSearch_Click(object sender, EventArgs e)
         {
-            string dbPath = @"D:\sqlite\Databases\zoo.db"; // Укажите путь к вашей базе данных
+            string dbPath = @"D:\\sqlite\\Databases\\zoo.db"; // Укажите путь к вашей базе данных
             string connectionString = $"Data Source={dbPath};Version=3;";
 
             try
@@ -913,30 +1220,79 @@ namespace АИС_зоопарк
                 {
                     connection.Open();
 
-                    // SQL-запрос для загрузки всех данных
-                    string query = "SELECT * FROM Животные";
+                    // Запрос для загрузки всех данных
+                    string query = @"
+                SELECT 
+                    Животные.[Номер ветеринарной карты], 
+                    Животные.[Кличка], 
+                    Животные.[Семейство], 
+                    Животные.[Класс], 
+                    Животные.[Возраст], 
+                    Животные.[Пол], 
+                    Животные.[Страна обитания], 
+                    Животные.[Масса], 
+                    Животные.[Высота], 
+                    Животные.[Продолжительность жизни], 
+                    Сотрудники.[ФИО] AS 'Сотрудник ответственный за животное'
+                FROM 
+                    Животные
+                LEFT JOIN 
+                    Сотрудники
+                ON 
+                    Животные.[Сотрудник ответственный за животное] = Сотрудники.[ID Работника]";
 
-                    using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                    using (SQLiteDataAdapter adapter = new SQLiteDataAdapter(query, connection))
                     {
-                        SQLiteDataAdapter adapter = new SQLiteDataAdapter(command);
-                        DataTable results = new DataTable();
-                        adapter.Fill(results);
+                        DataTable originalTable = new DataTable();
+                        adapter.Fill(originalTable);
 
-                        // Обновляем DataGridView с полным набором данных
-                        dataGridViewAnimals.DataSource = results;
+                        // Создаём новую таблицу с порядковой колонкой в начале
+                        DataTable newTable = new DataTable();
+
+                        // Добавляем колонку "№" в начало
+                        newTable.Columns.Add("№", typeof(int));
+
+                        // Копируем остальные колонки из оригинальной таблицы
+                        foreach (DataColumn column in originalTable.Columns)
+                        {
+                            newTable.Columns.Add(column.ColumnName, column.DataType);
+                        }
+
+                        // Заполняем новую таблицу данными из оригинальной и добавляем порядковые номера
+                        for (int i = 0; i < originalTable.Rows.Count; i++)
+                        {
+                            DataRow newRow = newTable.NewRow();
+                            newRow["№"] = i + 1; // Порядковый номер
+                            foreach (DataColumn column in originalTable.Columns)
+                            {
+                                newRow[column.ColumnName] = originalTable.Rows[i][column];
+                            }
+                            newTable.Rows.Add(newRow);
+                        }
+
+                        // Привязываем новую таблицу к DataGridView
+                        dataGridViewAnimals.DataSource = newTable;
+
+                        // Скрываем колонку с первичным ключом
+                        if (dataGridViewAnimals.Columns.Contains("Номер ветеринарной карты"))
+                        {
+                            dataGridViewAnimals.Columns["Номер ветеринарной карты"].Visible = false;
+                        }
                     }
                 }
 
                 // Очищаем текстовое поле поиска (если используется)
-                txtSearch.Text = "";
-
-                MessageBox.Show("Поиск сброшен. Отображена полная таблица.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                txtSearch.Text = string.Empty;
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка при сбросе поиска: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+
+
+
 
         private void buttonEditEmployee_Click(object sender, EventArgs e)
         {
@@ -951,7 +1307,7 @@ namespace АИС_зоопарк
                     textBoxEmployeeAge.Text = selectedRow.Cells["Возраст"].Value?.ToString() ?? "";
                     textBoxEmployeeExperience.Text = selectedRow.Cells["Стаж работы"].Value?.ToString() ?? "";
                     textBoxEmployeeSalary.Text = selectedRow.Cells["Зарплата"].Value?.ToString() ?? "";
-                    textBoxEmployeeSpecialty.Text = selectedRow.Cells["Должность"].Value?.ToString() ?? "";
+                    comboBoxPosition.Text = selectedRow.Cells["Должность"].Value?.ToString() ?? "";
                 }
                 catch (Exception ex)
                 {
@@ -964,6 +1320,7 @@ namespace АИС_зоопарк
             }
         }
 
+
         private void buttonSave_Click(object sender, EventArgs e)
         {
             if (dataGridViewEmployees.SelectedRows.Count > 0)
@@ -972,12 +1329,59 @@ namespace АИС_зоопарк
 
                 try
                 {
+                    // Проверка на заполненность всех полей
+                    if (string.IsNullOrWhiteSpace(textBoxEmployeeName.Text) ||
+                        string.IsNullOrWhiteSpace(textBoxEmployeeAge.Text) ||
+                        string.IsNullOrWhiteSpace(textBoxEmployeeExperience.Text) ||
+                        string.IsNullOrWhiteSpace(textBoxEmployeeSalary.Text) ||
+                        string.IsNullOrWhiteSpace(comboBoxPosition.Text))
+                    {
+                        MessageBox.Show("Пожалуйста, заполните все поля перед сохранением.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
+                    // Проверка корректности возрастных и числовых данных
+                    if (!int.TryParse(textBoxEmployeeAge.Text, out int age) || age <= 0 ||
+                        !int.TryParse(textBoxEmployeeExperience.Text, out int experience) || experience < 0 ||
+                        !decimal.TryParse(textBoxEmployeeSalary.Text, out decimal salary) || salary <= 0)
+                    {
+                        MessageBox.Show("Пожалуйста, введите корректные числовые значения для возраста, стажа и зарплаты.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
                     // Обновление данных в DataGridView
                     selectedRow.Cells["ФИО"].Value = textBoxEmployeeName.Text;
-                    selectedRow.Cells["Возраст"].Value = textBoxEmployeeAge.Text;
-                    selectedRow.Cells["Стаж работы"].Value = textBoxEmployeeExperience.Text;
-                    selectedRow.Cells["Зарплата"].Value = textBoxEmployeeSalary.Text;
-                    selectedRow.Cells["Должность"].Value = textBoxEmployeeSpecialty.Text;
+                    selectedRow.Cells["Возраст"].Value = age;
+                    selectedRow.Cells["Стаж работы"].Value = experience;
+                    selectedRow.Cells["Зарплата"].Value = salary;
+                    selectedRow.Cells["Должность"].Value = comboBoxPosition.Text;
+
+                    string connectionString = @"Data Source=D:\sqlite\Databases\zoo.db;Version=3;";
+                    string query = @"
+    UPDATE Сотрудники
+    SET 
+        [ФИО] = @fio,
+        [Возраст] = @age,
+        [Стаж работы] = @experience,
+        [Зарплата] = @salary,
+        [Должность] = @position
+    WHERE [ID Работника] = @id";
+
+                    using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                    {
+                        connection.Open();
+                        using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                        {
+                            command.Parameters.AddWithValue("@fio", textBoxEmployeeName.Text);
+                            command.Parameters.AddWithValue("@age", age);
+                            command.Parameters.AddWithValue("@experience", experience);
+                            command.Parameters.AddWithValue("@salary", salary);
+                            command.Parameters.AddWithValue("@position", comboBoxPosition.Text);
+                            command.Parameters.AddWithValue("@id", selectedRow.Cells["ID Работника"].Value);
+
+                            command.ExecuteNonQuery();
+                        }
+                    }
 
                     // Сообщение об успешном обновлении
                     MessageBox.Show("Данные сотрудника успешно обновлены!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -992,7 +1396,1080 @@ namespace АИС_зоопарк
                 MessageBox.Show("Пожалуйста, выберите сотрудника для сохранения изменений.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
-    }
+
+
+        private void buttonSearchEmploye_Click(object sender, EventArgs e)
+        {
+            // Получаем введённую фамилию из текстового поля
+            string lastName = textBoxSearch.Text.Trim();
+
+            if (string.IsNullOrEmpty(lastName))
+            {
+                MessageBox.Show("Введите фамилию для поиска!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Создаем новую таблицу, в которой будут только найденные сотрудники
+            DataTable filteredTable = new DataTable();
+
+            // Копируем структуру исходной таблицы DataGridView
+            foreach (DataGridViewColumn column in dataGridViewEmployees.Columns)
+            {
+                filteredTable.Columns.Add(column.Name, column.ValueType);
+            }
+
+            // Проходим по всем строкам DataGridView
+            foreach (DataGridViewRow row in dataGridViewEmployees.Rows)
+            {
+                if (row.Cells["ФИО"].Value != null)
+                {
+                    string fullName = row.Cells["ФИО"].Value.ToString().Trim();
+
+                    // Проверяем, совпадает ли фамилия (первая часть ФИО)
+                    string[] fullNameParts = fullName.Split(' '); // Разделяем ФИО на части
+                    if (fullNameParts.Length > 0 && fullNameParts[0].Equals(lastName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Если совпадает, добавляем строку в новую таблицу
+                        DataRow newRow = filteredTable.NewRow();
+                        for (int i = 0; i < dataGridViewEmployees.Columns.Count; i++)
+                        {
+                            newRow[i] = row.Cells[i].Value;
+                        }
+                        filteredTable.Rows.Add(newRow);
+                    }
+                }
+            }
+
+            // Если нашлись подходящие строки, обновляем DataGridView
+            if (filteredTable.Rows.Count > 0)
+            {
+                dataGridViewEmployees.DataSource = filteredTable;
+            }
+            else
+            {
+                MessageBox.Show("Сотрудники с такой фамилией не найдены.", "Результат", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // Если ничего не найдено, очищаем DataGridView
+                dataGridViewEmployees.DataSource = null;
+            }
+        }
+
+        private void ResetEmployeeSearch_Click(object sender, EventArgs e)
+        {
+            string dbPath = @"D:\sqlite\Databases\zoo.db"; // Укажите путь к вашей базе данных
+            string connectionString = $"Data Source={dbPath};Version=3;";
+
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+
+                    // SQL-запрос для загрузки всех данных из таблицы сотрудников
+                    string query = "SELECT * FROM Сотрудники";
+
+                    using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                    {
+                        SQLiteDataAdapter adapter = new SQLiteDataAdapter(command);
+                        DataTable results = new DataTable();
+                        adapter.Fill(results);
+
+                        // Обновляем DataGridView с полным набором данных
+                        dataGridViewEmployees.DataSource = results;
+                    }
+                }
+
+                // Очищаем текстовое поле поиска (если используется)
+                textBoxSearch.Text = "";
+
+                MessageBox.Show("Поиск сброшен. Отображена полная таблица сотрудников.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при сбросе поиска: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void buttonFinishEditing_Click(object sender, EventArgs e)
+        {
+            if (comboBoxEmployee.SelectedItem != null)
+            {
+                string selectedEmployee = comboBoxEmployee.SelectedItem.ToString();
+
+                if (dataGridViewEmployees.SelectedRows.Count > 0)
+                {
+                    var selectedRow = dataGridViewEmployees.SelectedRows[0];
+
+                    // Обновляем значение в таблице
+                    selectedRow.Cells["Сотрудник"].Value = selectedEmployee;
+                }
+                else
+                {
+                    MessageBox.Show("Пожалуйста, выберите строку для завершения редактирования.");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Выберите билет.");
+            }
+        }
+
+
+        private void dataGridViewTickets_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            try
+            {
+                if (e.RowIndex >= 0) // Проверка на допустимый индекс строки
+                {
+                    DataGridViewRow row = dataGridViewTickets.Rows[e.RowIndex];
+
+                    // Проверка наличия каждого столбца перед доступом
+                    txtServices.Text = row.Cells["Услуги"]?.Value?.ToString() ?? "Не указано";
+                    txtTotalCost.Text = row.Cells["Суммарная стоимость"]?.Value?.ToString() ?? "0";
+                    txtPurchaseDate.Text = row.Cells["Дата покупки"]?.Value?.ToString() ?? "Не указано";
+                    txtFirstName.Text = row.Cells["Имя Покупателя"]?.Value?.ToString() ?? "Не указано";
+                    txtLastName.Text = row.Cells["Фамилия Покупателя"]?.Value?.ToString() ?? "Не указано";
+
+                    // Проверка наличия столбца "Сотрудник, выдавший билет"
+                    if (dataGridViewTickets.Columns.Contains("Сотрудник, выдавший билет"))
+                    {
+                        string employee = row.Cells["Сотрудник, выдавший билет"]?.Value?.ToString();
+                        if (!string.IsNullOrEmpty(employee))
+                        {
+                            // Установка значения ComboBox для сотрудника
+                            foreach (var item in comboBoxEmployee.Items)
+                            {
+                                if (item.ToString() == employee)
+                                {
+                                    comboBoxEmployee.SelectedItem = item;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Столбец 'Сотрудник, выдавший билет' отсутствует в таблице.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при обработке клика: {ex.Message}");
+            }
+
+            // Отключение сортировки для всех столбцов
+            foreach (DataGridViewColumn column in dataGridViewTickets.Columns)
+            {
+                column.SortMode = DataGridViewColumnSortMode.NotSortable;
+            }
+        }
+
+
+        private void SearchByDate_Click(object sender, EventArgs e)
+        {
+            string searchDay = txtSearchDay.Text.Trim();
+            string searchMonth = txtSearchMonth.Text.Trim();
+
+            // Проверяем, что оба поля заполнены
+            if (string.IsNullOrWhiteSpace(searchDay) || string.IsNullOrWhiteSpace(searchMonth))
+            {
+                MessageBox.Show("Пожалуйста, введите день и месяц для поиска.");
+                return;
+            }
+
+            // Проверяем, что введены корректные числа
+            if (!int.TryParse(searchDay, out int day) || day < 1 || day > 31 ||
+                !int.TryParse(searchMonth, out int month) || month < 1 || month > 12)
+            {
+                MessageBox.Show("Введите корректные значения для дня (1-31) и месяца (1-12).");
+                return;
+            }
+
+            string dbPath = @"D:\sqlite\Databases\zoo.db";
+            string connectionString = $"Data Source={dbPath};Version=3;";
+
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+
+                    // SQL-запрос для поиска по дню и месяцу
+                    string query = @"
+                SELECT [ID Билета], Услуги, [Суммарная стоимость], [Дата покупки], 
+                       [Сотрудник, выдавший билет], Имя AS 'Имя покупателя', Фамилия AS 'Фамилия покупателя'
+                FROM Билеты 
+                WHERE strftime('%d', [Дата покупки]) = @day AND strftime('%m', [Дата покупки]) = @month";
+
+                    using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                    {
+                        // Передаём день и месяц в параметрах
+                        command.Parameters.AddWithValue("@day", searchDay.PadLeft(2, '0')); // Форматируем день
+                        command.Parameters.AddWithValue("@month", searchMonth.PadLeft(2, '0')); // Форматируем месяц
+
+                        using (SQLiteDataAdapter adapter = new SQLiteDataAdapter(command))
+                        {
+                            DataTable dataTable = new DataTable();
+                            adapter.Fill(dataTable);
+
+                            if (dataTable.Rows.Count == 0)
+                            {
+                                MessageBox.Show("Билеты на указанное число и месяц не найдены.");
+                            }
+                            else
+                            {
+                                dataGridViewTickets.DataSource = dataTable;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при поиске: " + ex.Message);
+            }
+        }
+
+
+
+        private void ClearInputFields()
+        {
+            txtServices.Text = string.Empty;
+            txtTotalCost.Text = string.Empty;
+            txtPurchaseDate.Text = string.Empty;
+            txtFirstName.Text = string.Empty;
+            txtLastName.Text = string.Empty;
+        }
+
+        private void buttonCreateTicket_Click(object sender, EventArgs e)
+        {
+            // Получаем данные из текстовых полей
+            string services = txtServices.Text.Trim();
+            string totalCost = txtTotalCost.Text.Trim();
+            string purchaseDate = txtPurchaseDate.Text.Trim();
+            string firstName = txtFirstName.Text.Trim();
+            string lastName = txtLastName.Text.Trim();
+
+            // Проверяем, что все необходимые поля заполнены
+            if (string.IsNullOrWhiteSpace(services) ||
+                string.IsNullOrWhiteSpace(totalCost) ||
+                string.IsNullOrWhiteSpace(purchaseDate) ||
+                string.IsNullOrWhiteSpace(firstName) ||
+                string.IsNullOrWhiteSpace(lastName))
+            {
+                MessageBox.Show("Пожалуйста, заполните все поля для создания билета.");
+                return;
+            }
+
+            string dbPath = @"D:\sqlite\Databases\zoo.db";
+            string connectionString = $"Data Source={dbPath};Version=3;";
+
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+
+                    // SQL-запрос для вставки нового билета
+                    string query = "INSERT INTO Билеты (Услуги, [Суммарная стоимость], [Дата покупки], Имя, Фамилия) " +
+                                   "VALUES (@services, @totalCost, @purchaseDate, @firstName, @lastName)";
+
+                    using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                    {
+                        // Передаем параметры в запрос
+                        command.Parameters.AddWithValue("@services", services);
+                        command.Parameters.AddWithValue("@totalCost", totalCost);
+                        command.Parameters.AddWithValue("@purchaseDate", purchaseDate);
+                        command.Parameters.AddWithValue("@firstName", firstName);
+                        command.Parameters.AddWithValue("@lastName", lastName);
+
+                        // Выполняем запрос
+                        int rowsAffected = command.ExecuteNonQuery();
+
+                        if (rowsAffected > 0)
+                        {
+                            MessageBox.Show("Билет успешно создан!");
+                            ClearInputFields(); // Очистка текстовых полей
+                        }
+                        else
+                        {
+                            MessageBox.Show("Не удалось создать билет. Попробуйте еще раз.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при создании билета: " + ex.Message);
+            }
+        }
+
+        private void btnSearchAnimal_Click(object sender, EventArgs e)
+        {
+            string searchAnimal = txtSearchAnimal.Text.Trim(); // Получаем введенное имя животного
+
+            if (string.IsNullOrWhiteSpace(searchAnimal))
+            {
+                MessageBox.Show("Пожалуйста, введите имя животного для поиска.");
+                return;
+            }
+
+            string dbPath = @"D:\sqlite\Databases\zoo.db";
+            string connectionString = $"Data Source={dbPath};Version=3;";
+
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+
+                    // SQL-запрос для поиска по имени животного
+                  string query = @"
+    SELECT 
+        [Номер вольера] AS 'Номер', 
+        [Вид_вольера] AS 'Вид вольера', 
+        [Корм нужный в вольере] AS 'Корм', 
+        [Сотрудник ответственный за вольер] AS 'Сотрудник', 
+        [Животное_в_вольере] AS 'Животное'
+    FROM Вольеры 
+    WHERE [Животное_в_вольере] LIKE @animal";
+
+                    using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                    {
+                        // Используем LIKE для поиска совпадений
+                        command.Parameters.AddWithValue("@animal", "%" + searchAnimal + "%");
+
+                        using (SQLiteDataAdapter adapter = new SQLiteDataAdapter(command))
+                        {
+                            DataTable dataTable = new DataTable();
+                            adapter.Fill(dataTable);
+
+                            // Отображаем результаты в DataGridView
+                            dataGridViewEnclosures.DataSource = dataTable;
+                            if (dataGridViewEnclosures.Columns.Contains("Номер"))
+                            {
+                                dataGridViewEnclosures.Columns["Номер вольера"].Visible = false;
+                            }
+                            if (dataTable.Rows.Count == 0)
+                            {
+                                MessageBox.Show("Вольеры с указанным животным не найдены.");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при поиске: " + ex.Message);
+            }
+        }
+
+        private void buttonResetFilters_Click(object sender, EventArgs e)
+        {
+            string dbPath = @"D:\sqlite\Databases\zoo.db";
+            string connectionString = $"Data Source={dbPath};Version=3;";
+
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+                    string query = @"
+                SELECT 
+                    [Вид_вольера] AS 'Вид вольера', 
+                    [Корм нужный в вольере] AS 'Корм', 
+                    (SELECT ФИО FROM Сотрудники WHERE [ID Работника] = Вольеры.[Сотрудник ответственный за вольер]) AS 'ФИО Сотрудника',
+                    [Животное_в_вольере] AS 'Животное'
+                FROM Вольеры";
+
+                    using (SQLiteDataAdapter adapter = new SQLiteDataAdapter(query, connection))
+                    {
+                        DataTable dataTable = new DataTable();
+                        adapter.Fill(dataTable);
+                        dataGridViewEnclosures.DataSource = dataTable;
+                    }
+                }
+
+                // Убедимся, что номера строк обновляются
+                UpdateRowNumbersEnclosures();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при загрузке данных: " + ex.Message);
+            }
+        }
+
+        private void buttonreset_Click(object sender, EventArgs e)
+        {
+            string dbPath = @"D:\sqlite\Databases\zoo.db";
+            string connectionString = $"Data Source={dbPath};Version=3;";
+
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+
+                    // SQL-запрос для загрузки всех билетов
+                    string query = "SELECT " +
+                                   "Услуги, " +
+                                   "[Суммарная стоимость], " +
+                                   "[Дата покупки], " +
+                                   "[Сотрудник, выдавший билет], " +
+                                   "Имя AS 'Имя покупателя', " +
+                                   "Фамилия AS 'Фамилия покупателя' " +
+                                   "FROM Билеты";
+
+                    using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                    {
+                        using (SQLiteDataAdapter adapter = new SQLiteDataAdapter(command))
+                        {
+                            DataTable dataTable = new DataTable();
+                            adapter.Fill(dataTable);
+
+                            // Отображаем все данные в DataGridView
+                            dataGridViewTickets.DataSource = dataTable;
+                        }
+                    }
+                }
+
+                // Очищаем поле поиска
+                txtSearchDay.Text = string.Empty;
+                txtSearchMonth.Text = string.Empty;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при сбросе фильтра: " + ex.Message);
+            }
+        }
+
+
+        private void buttonRefreshArchive_Click(object sender, EventArgs e)
+        {
+            LoadArchivedTickets(); // Обновляем архив
+        }
+
+
+
+
+        private void buttonPoisk_Click(object sender, EventArgs e)
+        {
+            string firstName = txtFirstName1.Text.Trim();
+            string lastName = txtLastName1.Text.Trim();
+
+            // Проверка, что поля не пустые
+            if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
+            {
+                MessageBox.Show("Введите имя и фамилию для поиска.");
+                return;
+            }
+
+            // Проверка, что введены только буквы
+            if (!IsValidName(firstName) || !IsValidName(lastName))
+            {
+                MessageBox.Show("Имя и фамилия могут содержать только буквы.");
+                return;
+            }
+
+            decimal totalSpent = 0;
+            int visitCount = 0;
+
+            foreach (DataGridViewRow row in dataGridViewTickets.Rows)
+            {
+                if (row.Cells["Имя Покупателя"].Value != null && row.Cells["Фамилия Покупателя"].Value != null)
+                {
+                    string rowFirstName = row.Cells["Имя Покупателя"].Value.ToString();
+                    string rowLastName = row.Cells["Фамилия Покупателя"].Value.ToString();
+
+                    if (rowFirstName.Equals(firstName, StringComparison.OrdinalIgnoreCase) &&
+                        rowLastName.Equals(lastName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        visitCount++;
+                        if (decimal.TryParse(row.Cells["Суммарная стоимость"].Value?.ToString(), out decimal cost))
+                        {
+                            totalSpent += cost;
+                        }
+                    }
+                }
+            }
+
+            lblResults.Text = $"Посещений: {visitCount}, Потрачено: {totalSpent:C}";
+        }
+
+        // Проверка корректности имени (только буквы)
+        private bool IsValidName(string name)
+        {
+            foreach (char c in name)
+            {
+                if (!char.IsLetter(c) && !char.IsWhiteSpace(c))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private void buttonEditData_Click(object sender, EventArgs e)
+        {
+            // Проверяем, что хотя бы одна строка выбрана в DataGridView
+            if (dataGridViewServices.SelectedRows.Count > 0)
+            {
+                // Получаем выбранную строку
+                DataGridViewRow selectedRow = dataGridViewServices.SelectedRows[0];
+
+                // Заполняем текстовые поля данными из выбранной строки
+                textBoxServiceName.Text = selectedRow.Cells["Название"].Value?.ToString();
+                textBoxServiceDescription.Text = selectedRow.Cells["Описание"].Value?.ToString();
+                textBoxServicePrice.Text = selectedRow.Cells["Цена"].Value?.ToString();
+            }
+            else
+            {
+                // Если строка не выбрана, показываем сообщение
+                MessageBox.Show("Пожалуйста, выберите строку для редактирования.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+        private void LoadData()
+        {
+            string dbPath = @"D:\sqlite\Databases\zoo.db";  // Путь к вашей базе данных
+            string connectionString = $"Data Source={dbPath};Version=3;";
+
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+
+                    // Запрос для получения всех данных из таблицы Услуги
+                    string query = "SELECT [Номер услуги], [Название], [Описание], [Цена] FROM [Услуги]";
+
+                    using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                    {
+                        SQLiteDataAdapter adapter = new SQLiteDataAdapter(command);
+                        DataTable dataTable = new DataTable();
+                        adapter.Fill(dataTable);
+
+                        // Привязываем полученные данные к DataGridView
+                        dataGridViewServices.DataSource = dataTable;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при работе с базой данных: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+
+        private void button1save_Click(object sender, EventArgs e)
+        {
+            // Проверяем, что строка выбрана в DataGridView
+            if (dataGridViewServices.SelectedRows.Count > 0)
+            {
+                // Получаем выбранную строку
+                DataGridViewRow selectedRow = dataGridViewServices.SelectedRows[0];
+
+                // Проверка на пустые значения в текстовых полях
+                if (string.IsNullOrEmpty(textBoxServiceName.Text) ||
+                    string.IsNullOrEmpty(textBoxServiceDescription.Text) ||
+                    string.IsNullOrEmpty(textBoxServicePrice.Text))
+                {
+                    MessageBox.Show("Пожалуйста, заполните все поля.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // Проверка на корректность цены
+                if (!decimal.TryParse(textBoxServicePrice.Text, out decimal price))
+                {
+                    MessageBox.Show("Введите корректную цену.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // Обновляем данные в строке DataGridView
+                selectedRow.Cells["Название"].Value = textBoxServiceName.Text;
+                selectedRow.Cells["Описание"].Value = textBoxServiceDescription.Text;
+                selectedRow.Cells["Цена"].Value = price;
+
+                // Получаем Номер услуги из выбранной строки
+                int id = Convert.ToInt32(selectedRow.Cells["Номер услуги"].Value);
+
+                // Путь к базе данных SQLite
+                string dbPath = @"D:\sqlite\Databases\zoo.db";  // Путь к базе данных
+                string connectionString = $"Data Source={dbPath};Version=3;";
+
+                try
+                {
+                    // Обновляем запись в базе данных
+                    using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                    {
+                        connection.Open();
+
+                        // Запрос для обновления данных в таблице Услуги
+                        string query = @"
+            UPDATE [Услуги]
+            SET [Название] = @name,
+                [Описание] = @description,
+                [Цена] = @price
+            WHERE [Номер услуги] = @id"; // Используем столбец "Номер услуги" для уникальной идентификации записи
+
+                        using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                        {
+                            // Добавляем параметры для запроса
+                            command.Parameters.AddWithValue("@name", textBoxServiceName.Text);
+                            command.Parameters.AddWithValue("@description", textBoxServiceDescription.Text);
+                            command.Parameters.AddWithValue("@price", price);
+                            command.Parameters.AddWithValue("@id", id);  // Номер услуги из выбранной строки
+
+                            // Выполняем запрос
+                            command.ExecuteNonQuery();
+                        }
+                    }
+
+                    // Сообщение об успешном обновлении
+                    MessageBox.Show("Данные успешно обновлены в базе данных!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    // Обновляем данные в DataGridView
+                    LoadData(); // Загружаем актуальные данные из базы данных
+                }
+                catch (Exception ex)
+                {
+                    // В случае ошибки
+                    MessageBox.Show($"Ошибка при обновлении базы данных: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+            {
+                // Если строка не выбрана
+                MessageBox.Show("Выберите строку для изменения.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            try
+            {
+                // Проверяем, что клик произошел не на заголовке и не на пустой строке
+                if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+                {
+                    var cellValue = dataGridViewTickets.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+                    if (cellValue != null)
+                    {
+                        MessageBox.Show($"Вы выбрали: {cellValue}");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Пустая ячейка.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при обработке клика: {ex.Message}");
+            }
+        }
+        private Dictionary<string, List<string>> familyToClassesMap = new Dictionary<string, List<string>>()
+{
+    { "Кошачьи", new List<string> { "Белый тигр", "Лев обычный", "Амурский тигр" } },
+    { "Собачьи", new List<string> { "Канадский волк", "Дикая собака" } },
+    { "Грызуновые", new List<string> { "Капибара", "Бобр речной" } },
+    { "Приматы", new List<string> { "Горная горилла", "Шимпанзе", "Орангутан" } },
+    { "Парнокопытные", new List<string> { "Лось", "Африканский буйвол" } },
+    { "Птицы", new List<string> { "Императорский пингвин", "Алый ара", "Фламинго" } },
+    { "Рептилии", new List<string> { "Крокодил нильский", "Анаконда", "Игуана зелёная" } },
+    { "Рыбы", new List<string> { "Сельдь", "Китовая акула" } },
+    { "Насекомые", new List<string> { "Бабочка монарх", "Муравей" } },
+    { "Млекопитающие", new List<string> { "Белый медведь", "Гигантская панда" } },
+    { "Земноводные", new List<string> { "Лягушка-древолаз", "Саламандра" } },
+    { "Членистоногие", new List<string> { "Тарантул", "Скорпион" } }
+};
+        private Dictionary<string, int> speciesToLifeSpanMap = new Dictionary<string, int>()
+{
+    { "Белый тигр", 20 },
+    { "Лев обычный", 14 },
+    { "Амурский тигр", 18 },
+    { "Канадский волк", 16 },
+    { "Дикая собака", 13 },
+    { "Капибара", 12 },
+    { "Бобр речной", 10 },
+    { "Горная горилла", 40 },
+    { "Шимпанзе", 50 },
+    { "Орангутан", 35 },
+    { "Лось", 20 },
+    { "Африканский буйвол", 25 },
+    { "Императорский пингвин", 20 },
+    { "Алый ара", 50 },
+    { "Фламинго", 30 },
+    { "Крокодил нильский", 70 },
+    { "Анаконда", 30 },
+    { "Игуана зелёная", 15 },
+    { "Сельдь", 8 },
+    { "Китовая акула", 70 },
+    { "Бабочка монарх", 0 },
+    { "Муравей", 0 },
+    { "Белый медведь", 25 },
+    { "Гигантская панда", 18 },
+    { "Лягушка-древолаз", 6 },
+    { "Саламандра", 12 },
+    { "Тарантул", 8 },
+    { "Скорпион", 6 }
+};
+        private Dictionary<string, List<string>> enclosureTypeToAllowedFamilies = new Dictionary<string, List<string>>()
+{
+    { "Травоядное", new List<string> { "Парнокопытные", "Грызуновые" } },
+    { "Хищник", new List<string> { "Кошачьи", "Собачьи", "Рептилии" } },
+    { "Птицы", new List<string> { "Птицы" } },
+    { "Приматы", new List<string> { "Приматы" } },
+    { "Рыбы", new List<string> { "Рыбы" } },
+    { "Земноводные", new List<string> { "Земноводные" } },
+    { "Насекомые", new List<string> { "Насекомые", "Членистоногие" } }
+};
+
+        private bool isUpdating = false;
+        private void textBoxFamily_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (isUpdating) return; // Предотвращаем циклический вызов
+
+            isUpdating = true; // Устанавливаем флаг
+            try
+            {
+                // Получаем выбранное семейство
+                string selectedFamily = textBoxFamily.SelectedItem?.ToString();
+
+                // Очищаем ComboBox "Класс" (textBoxSpecies)
+                textBoxSpecies.Items.Clear();
+
+                if (string.IsNullOrEmpty(selectedFamily) || !familyToClassesMap.ContainsKey(selectedFamily))
+                {
+                    return; // Если семейство не выбрано или не найдено в словаре
+                }
+
+                // Добавляем классы, связанные с выбранным семейством
+                textBoxSpecies.Items.AddRange(familyToClassesMap[selectedFamily].ToArray());
+
+                // Устанавливаем первый элемент как выбранный, если есть доступные классы
+                if (textBoxSpecies.Items.Count > 0)
+                {
+                    textBoxSpecies.SelectedIndex = 0;
+                }
+            }
+            finally
+            {
+                isUpdating = false; // Сбрасываем флаг
+            }
+        }
+
+        private void textBoxSpecies_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (isUpdating) return; // Предотвращаем циклический вызов
+
+            isUpdating = true; // Устанавливаем флаг
+            try
+            {
+                // Получаем выбранный класс
+                string selectedClass = textBoxSpecies.SelectedItem?.ToString();
+
+                // Проверяем наличие выбранного класса
+                if (string.IsNullOrEmpty(selectedClass)) return;
+
+                // Находим семейство, к которому относится класс
+                string matchingFamily = familyToClassesMap.FirstOrDefault(
+                    kvp => kvp.Value.Contains(selectedClass)).Key;
+
+                // Обновляем семейство только при необходимости
+                if (!string.IsNullOrEmpty(matchingFamily) && textBoxFamily.SelectedItem?.ToString() != matchingFamily)
+                {
+                    textBoxFamily.SelectedItem = matchingFamily;
+                }
+
+                // Устанавливаем продолжительность жизни
+                if (speciesToLifeSpanMap.ContainsKey(selectedClass))
+                {
+                    textBoxLifetime.Text = speciesToLifeSpanMap[selectedClass].ToString(); // Установка в текстовое поле
+                }
+                else
+                {
+                    textBoxLifetime.Text = ""; // Если данных нет, оставляем поле пустым
+                }
+            }
+            finally
+            {
+                isUpdating = false; // Сбрасываем флаг
+            }
+        }
+        private void dataGridViewEnclosures_SelectionChanged(object sender, EventArgs e)
+        {
+            if (dataGridViewEnclosures.SelectedRows.Count > 0)
+            {
+                var selectedRow = dataGridViewEnclosures.SelectedRows[0];
+
+                // Проверка значений
+                string enclosureType = selectedRow.Cells["Вид вольера"]?.Value?.ToString();
+                string enclosureFood = selectedRow.Cells["Корм"]?.Value?.ToString();
+                string enclosureWorker = selectedRow.Cells["ФИО Сотрудника"]?.Value?.ToString();
+                string enclosureAnimal = selectedRow.Cells["Животное"]?.Value?.ToString();
+
+                Console.WriteLine($"Вид_вольера: {enclosureType}, Корм: {enclosureFood}, Сотрудник: {enclosureWorker}, Животное: {enclosureAnimal}");
+
+                // Заполняем элементы
+                comboBoxEnclosureType.SelectedItem = enclosureType;
+                textBoxEnclosureFood.Text = enclosureFood;
+                comboBoxEnclosureWorker.SelectedItem = enclosureWorker;
+                comboBoxEnclosureAnimal.SelectedItem = enclosureAnimal;
+            }
+        }
+
+
+
+
+
+        private void buttonSaveEnclosureChanges_Click(object sender, EventArgs e)
+        {
+            if (dataGridViewEnclosures.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Выберите вольер для редактирования.");
+                return;
+            }
+
+            var selectedRow = dataGridViewEnclosures.SelectedRows[0];
+
+            if (!dataGridViewEnclosures.Columns.Contains("Номер вольера") || selectedRow.Cells["Номер вольера"].Value == null)
+            {
+                MessageBox.Show("Не удалось определить идентификатор записи (Номер вольера). Проверьте настройки таблицы.");
+                return;
+            }
+
+            int enclosureNumber;
+            if (!int.TryParse(selectedRow.Cells["Номер вольера"].Value.ToString(), out enclosureNumber))
+            {
+                MessageBox.Show("Идентификатор записи (Номер вольера) некорректен.");
+                return;
+            }
+
+            string newEnclosureType = comboBoxEnclosureType.SelectedItem?.ToString();
+            string newEnclosureFood = textBoxEnclosureFood.Text.Trim();
+            string newWorkerId = (comboBoxEnclosureWorker.SelectedItem as ComboBoxItem)?.Id.ToString();
+            string newAnimalInEnclosure = (comboBoxEnclosureAnimal.SelectedItem as ComboBoxItem)?.Name;
+
+            if (string.IsNullOrWhiteSpace(newEnclosureType) ||
+                string.IsNullOrWhiteSpace(newEnclosureFood) ||
+                string.IsNullOrWhiteSpace(newWorkerId) ||
+                string.IsNullOrWhiteSpace(newAnimalInEnclosure))
+            {
+                MessageBox.Show("Пожалуйста, заполните все обязательные поля перед сохранением.");
+                return;
+            }
+
+            string dbPath = @"D:\sqlite\Databases\zoo.db";
+            string connectionString = $"Data Source={dbPath};Version=3;";
+
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+                    string query = @"
+            UPDATE Вольеры
+            SET 
+                [Вид_вольера] = @enclosureType, 
+                [Корм нужный в вольере] = @food, 
+                [Сотрудник ответственный за вольер] = @workerId, 
+                [Животное_в_вольере] = @animalInEnclosure
+            WHERE 
+                [Номер вольера] = @id";
+
+                    using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@enclosureType", newEnclosureType);
+                        command.Parameters.AddWithValue("@food", newEnclosureFood);
+                        command.Parameters.AddWithValue("@workerId", newWorkerId);
+                        command.Parameters.AddWithValue("@animalInEnclosure", newAnimalInEnclosure);
+                        command.Parameters.AddWithValue("@id", enclosureNumber);
+
+                        command.ExecuteNonQuery();
+                    }
+                }
+
+                MessageBox.Show("Изменения успешно сохранены!");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при сохранении изменений: " + ex.Message);
+            }
+
+            LoadEnclosures();
+        }
+
+
+
+        private string GetAnimalClassFromDatabase(string animalName)
+        {
+            string dbPath = @"D:\sqlite\Databases\zoo.db";
+            string connectionString = $"Data Source={dbPath};Version=3;";
+            string animalClass = null;
+
+            try
+            {
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+                    string query = "SELECT Класс FROM Животные WHERE Кличка = @AnimalName";
+                    using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@AnimalName", animalName);
+
+                        using (SQLiteDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                animalClass = reader["Класс"].ToString();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при получении класса животного: " + ex.Message);
+            }
+
+            return animalClass;
+        }
+
+        private bool IsAnimalCompatibleWithEnclosure(string animalClass, string enclosureType)
+        {
+            // Получаем семейство животного
+            string animalFamily = familyToClassesMap.FirstOrDefault(f => f.Value.Contains(animalClass)).Key;
+
+            // Если семейство не найдено, животное несовместимо
+            if (string.IsNullOrEmpty(animalFamily))
+                return false;
+
+            // Проверяем, разрешено ли семейство для данного типа вольера
+            if (enclosureTypeToAllowedFamilies.ContainsKey(enclosureType) &&
+                enclosureTypeToAllowedFamilies[enclosureType].Contains(animalFamily))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private void dataGridViewServices_SelectionChanged(object sender, EventArgs e)
+        {
+            if (dataGridViewServices.SelectedRows.Count > 0)
+            {
+                var selectedRow = dataGridViewServices.SelectedRows[0];
+                textBoxDescriptionView.Text = selectedRow.Cells["Описание"].Value?.ToString() ?? string.Empty;
+            }
+        }
+        private void txtSearchDate_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Разрешаем только цифры и клавишу Backspace
+            if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void buttonDeleteEnclosure_Click(object sender, EventArgs e)
+        {
+            if (dataGridViewEnclosures.SelectedRows.Count > 0)
+            {
+                var selectedRow = dataGridViewEnclosures.SelectedRows[0];
+
+                // Получаем данные, по которым будем удалять вольер (например, тип вольера и животное)
+                string enclosureType = selectedRow.Cells["Вид вольера"].Value?.ToString();
+                string enclosureAnimal = selectedRow.Cells["Животное"].Value?.ToString();
+
+                if (string.IsNullOrEmpty(enclosureType) || string.IsNullOrEmpty(enclosureAnimal))
+                {
+                    MessageBox.Show("Не удалось определить вольер для удаления.");
+                    return;
+                }
+
+                // Подтверждение удаления
+                DialogResult dialogResult = MessageBox.Show($"Вы уверены, что хотите удалить вольер с типом '{enclosureType}' и животным '{enclosureAnimal}'?",
+        
+                    "Удаление вольера", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    try
+                    {
+                        string dbPath = @"D:\sqlite\Databases\zoo.db";
+                        string connectionString = $"Data Source={dbPath};Version=3;";
+
+                        using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                        {
+                            connection.Open();
+
+                            string query = "DELETE FROM Вольеры WHERE Вид_вольера = @EnclosureType AND Животное_в_вольере = @EnclosureAnimal";
+                            using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                            {
+                                command.Parameters.AddWithValue("@EnclosureType", enclosureType);
+                                command.Parameters.AddWithValue("@EnclosureAnimal", enclosureAnimal);
+
+                                int rowsAffected = command.ExecuteNonQuery();
+
+                                if (rowsAffected > 0)
+                                {
+                                    MessageBox.Show("Вольер успешно удалён.");
+
+                                    // Удаляем строку из DataGridView
+                                    dataGridViewEnclosures.Rows.Remove(selectedRow);
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Не удалось удалить вольер. Возможно, он уже был удалён.");
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Ошибка при удалении вольера: " + ex.Message);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Выберите вольер для удаления.");
+            }
+        }
+        private void LoadPositions()
+        {
+            // Задаем фиксированный список должностей
+            List<string> positions = new List<string>
+    {
+        "Охранник",
+        "Ветеринар",
+        "Экскурсовод",
+        "Администратор",
+        "Уборщик"
+    };
+
+            // Заполняем ComboBox
+            comboBoxPosition.Items.Clear();
+            comboBoxPosition.Items.AddRange(positions.ToArray());
+        }
+
+        private void buttonRefreshEmployees_Click(object sender, EventArgs e)
+        {
+            LoadEmployees(); 
+        }
+    }   
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
