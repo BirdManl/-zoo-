@@ -113,6 +113,9 @@
             this.textBoxServicePrice = new System.Windows.Forms.TextBox();
             this.textBoxServiceName = new System.Windows.Forms.TextBox();
             this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.label36 = new System.Windows.Forms.Label();
+            this.label35 = new System.Windows.Forms.Label();
+            this.txtSearchMonth = new System.Windows.Forms.TextBox();
             this.label32 = new System.Windows.Forms.Label();
             this.label30 = new System.Windows.Forms.Label();
             this.lblResults = new System.Windows.Forms.Label();
@@ -141,9 +144,7 @@
             this.tabPage6 = new System.Windows.Forms.TabPage();
             this.buttonRefreshArchive = new System.Windows.Forms.Button();
             this.dataGridViewArchive = new System.Windows.Forms.DataGridView();
-            this.txtSearchMonth = new System.Windows.Forms.TextBox();
-            this.label35 = new System.Windows.Forms.Label();
-            this.label36 = new System.Windows.Forms.Label();
+            this.textBoxAnimalType = new System.Windows.Forms.TextBox();
             this.tabPageHistory.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewAnimals)).BeginInit();
@@ -176,7 +177,7 @@
             // 
             // tabPage1
             // 
-            this.tabPage1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabPage1.BackColor = System.Drawing.Color.White;
             this.tabPage1.Controls.Add(this.textBoxSpecies);
             this.tabPage1.Controls.Add(this.textBoxFamily);
             this.tabPage1.Controls.Add(this.ResetSearch);
@@ -215,6 +216,7 @@
             // 
             // textBoxSpecies
             // 
+            this.textBoxSpecies.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.textBoxSpecies.FormattingEnabled = true;
             this.textBoxSpecies.Location = new System.Drawing.Point(299, 28);
             this.textBoxSpecies.Name = "textBoxSpecies";
@@ -224,6 +226,7 @@
             // 
             // textBoxFamily
             // 
+            this.textBoxFamily.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.textBoxFamily.FormattingEnabled = true;
             this.textBoxFamily.Location = new System.Drawing.Point(174, 27);
             this.textBoxFamily.Name = "textBoxFamily";
@@ -233,6 +236,7 @@
             // 
             // ResetSearch
             // 
+            this.ResetSearch.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.ResetSearch.Location = new System.Drawing.Point(353, 169);
             this.ResetSearch.Name = "ResetSearch";
             this.ResetSearch.Size = new System.Drawing.Size(93, 23);
@@ -243,6 +247,7 @@
             // 
             // buttonSaveChanges
             // 
+            this.buttonSaveChanges.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonSaveChanges.Location = new System.Drawing.Point(503, 132);
             this.buttonSaveChanges.Name = "buttonSaveChanges";
             this.buttonSaveChanges.Size = new System.Drawing.Size(116, 46);
@@ -253,6 +258,7 @@
             // 
             // buttonUpdate
             // 
+            this.buttonUpdate.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonUpdate.Location = new System.Drawing.Point(503, 184);
             this.buttonUpdate.Name = "buttonUpdate";
             this.buttonUpdate.Size = new System.Drawing.Size(116, 34);
@@ -263,6 +269,7 @@
             // 
             // buttonSearch
             // 
+            this.buttonSearch.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonSearch.Location = new System.Drawing.Point(248, 169);
             this.buttonSearch.Name = "buttonSearch";
             this.buttonSearch.Size = new System.Drawing.Size(99, 23);
@@ -280,6 +287,7 @@
             // 
             // buttonDeleteAnimal
             // 
+            this.buttonDeleteAnimal.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonDeleteAnimal.Location = new System.Drawing.Point(655, 121);
             this.buttonDeleteAnimal.Name = "buttonDeleteAnimal";
             this.buttonDeleteAnimal.Size = new System.Drawing.Size(214, 97);
@@ -303,54 +311,60 @@
             // label16
             // 
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(592, 9);
+            this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label16.Location = new System.Drawing.Point(581, 7);
             this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(96, 13);
+            this.label16.Size = new System.Drawing.Size(123, 16);
             this.label16.TabIndex = 23;
             this.label16.Text = "Страна обитания ";
             // 
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(171, 12);
+            this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label15.Location = new System.Drawing.Point(171, 8);
             this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(63, 13);
+            this.label15.Size = new System.Drawing.Size(79, 16);
             this.label15.TabIndex = 22;
             this.label15.Text = "Семейство";
             // 
             // label14
             // 
             this.label14.AutoSize = true;
+            this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.label14.Location = new System.Drawing.Point(556, 61);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(207, 13);
+            this.label14.Size = new System.Drawing.Size(268, 16);
             this.label14.TabIndex = 21;
             this.label14.Text = "Сотрудник ответственный за животное";
             // 
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(712, 9);
+            this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label13.Location = new System.Drawing.Point(712, 8);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(27, 13);
+            this.label13.Size = new System.Drawing.Size(33, 16);
             this.label13.TabIndex = 20;
             this.label13.Text = "Пол";
             // 
             // label12
             // 
             this.label12.AutoSize = true;
+            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.label12.Location = new System.Drawing.Point(296, 61);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(169, 13);
+            this.label12.Size = new System.Drawing.Size(216, 16);
             this.label12.TabIndex = 19;
             this.label12.Text = "Продолжительность жизни(лет)";
             // 
             // label11
             // 
             this.label11.AutoSize = true;
+            this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.label11.Location = new System.Drawing.Point(8, 61);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(57, 13);
+            this.label11.Size = new System.Drawing.Size(69, 16);
             this.label11.TabIndex = 18;
             this.label11.Text = "Масса(кг)";
             // 
@@ -365,41 +379,46 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(171, 61);
+            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label9.Location = new System.Drawing.Point(171, 59);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(65, 13);
+            this.label9.Size = new System.Drawing.Size(79, 16);
             this.label9.TabIndex = 16;
             this.label9.Text = "Высота(см)";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(461, 9);
+            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label8.Location = new System.Drawing.Point(461, 7);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(49, 13);
+            this.label8.Size = new System.Drawing.Size(62, 16);
             this.label8.TabIndex = 15;
             this.label8.Text = "Возраст";
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(317, 9);
+            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label7.Location = new System.Drawing.Point(302, 8);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(38, 13);
+            this.label7.Size = new System.Drawing.Size(45, 16);
             this.label7.TabIndex = 14;
             this.label7.Text = "Класс";
             // 
             // label6
             // 
             this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.label6.Location = new System.Drawing.Point(8, 9);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(43, 13);
+            this.label6.Size = new System.Drawing.Size(54, 16);
             this.label6.TabIndex = 13;
             this.label6.Text = "Кличка";
             // 
             // buttonAddAnimal
             // 
+            this.buttonAddAnimal.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonAddAnimal.Location = new System.Drawing.Point(8, 121);
             this.buttonAddAnimal.Name = "buttonAddAnimal";
             this.buttonAddAnimal.Size = new System.Drawing.Size(220, 97);
@@ -410,14 +429,16 @@
             // 
             // comboBoxWorker
             // 
+            this.comboBoxWorker.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxWorker.FormattingEnabled = true;
             this.comboBoxWorker.Location = new System.Drawing.Point(559, 78);
             this.comboBoxWorker.Name = "comboBoxWorker";
-            this.comboBoxWorker.Size = new System.Drawing.Size(243, 21);
+            this.comboBoxWorker.Size = new System.Drawing.Size(265, 21);
             this.comboBoxWorker.TabIndex = 11;
             // 
             // comboBoxGender
             // 
+            this.comboBoxGender.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxGender.FormattingEnabled = true;
             this.comboBoxGender.Location = new System.Drawing.Point(715, 27);
             this.comboBoxGender.Name = "comboBoxGender";
@@ -442,7 +463,7 @@
             // 
             this.textBoxLifetime.Location = new System.Drawing.Point(299, 78);
             this.textBoxLifetime.Name = "textBoxLifetime";
-            this.textBoxLifetime.Size = new System.Drawing.Size(166, 20);
+            this.textBoxLifetime.Size = new System.Drawing.Size(213, 20);
             this.textBoxLifetime.TabIndex = 6;
             // 
             // textBoxAge
@@ -454,9 +475,9 @@
             // 
             // textBoxCountry
             // 
-            this.textBoxCountry.Location = new System.Drawing.Point(595, 28);
+            this.textBoxCountry.Location = new System.Drawing.Point(584, 28);
             this.textBoxCountry.Name = "textBoxCountry";
-            this.textBoxCountry.Size = new System.Drawing.Size(100, 20);
+            this.textBoxCountry.Size = new System.Drawing.Size(125, 20);
             this.textBoxCountry.TabIndex = 1;
             // 
             // textBoxAnimalName
@@ -468,6 +489,7 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.textBoxAnimalType);
             this.tabPage2.Controls.Add(this.label33);
             this.tabPage2.Controls.Add(this.buttonRefreshEnclosures);
             this.tabPage2.Controls.Add(this.buttonSaveEnclosureChanges);
@@ -505,6 +527,7 @@
             // 
             // buttonRefreshEnclosures
             // 
+            this.buttonRefreshEnclosures.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonRefreshEnclosures.Location = new System.Drawing.Point(578, 392);
             this.buttonRefreshEnclosures.Name = "buttonRefreshEnclosures";
             this.buttonRefreshEnclosures.Size = new System.Drawing.Size(156, 91);
@@ -514,6 +537,7 @@
             // 
             // buttonSaveEnclosureChanges
             // 
+            this.buttonSaveEnclosureChanges.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonSaveEnclosureChanges.Location = new System.Drawing.Point(578, 298);
             this.buttonSaveEnclosureChanges.Name = "buttonSaveEnclosureChanges";
             this.buttonSaveEnclosureChanges.Size = new System.Drawing.Size(289, 88);
@@ -525,15 +549,16 @@
             // label31
             // 
             this.label31.AutoSize = true;
+            this.label31.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.label31.Location = new System.Drawing.Point(259, 66);
             this.label31.Name = "label31";
-            this.label31.Size = new System.Drawing.Size(100, 13);
+            this.label31.Size = new System.Drawing.Size(130, 16);
             this.label31.TabIndex = 14;
             this.label31.Text = "Введите название";
             // 
             // buttonResetFilters
             // 
-            this.buttonResetFilters.Location = new System.Drawing.Point(378, 80);
+            this.buttonResetFilters.Location = new System.Drawing.Point(418, 82);
             this.buttonResetFilters.Name = "buttonResetFilters";
             this.buttonResetFilters.Size = new System.Drawing.Size(75, 23);
             this.buttonResetFilters.TabIndex = 13;
@@ -543,9 +568,10 @@
             // 
             // btnSearchAnimal
             // 
-            this.btnSearchAnimal.Location = new System.Drawing.Point(262, 28);
+            this.btnSearchAnimal.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnSearchAnimal.Location = new System.Drawing.Point(262, 15);
             this.btnSearchAnimal.Name = "btnSearchAnimal";
-            this.btnSearchAnimal.Size = new System.Drawing.Size(100, 35);
+            this.btnSearchAnimal.Size = new System.Drawing.Size(100, 48);
             this.btnSearchAnimal.TabIndex = 12;
             this.btnSearchAnimal.Text = "Поиск животных";
             this.btnSearchAnimal.UseVisualStyleBackColor = true;
@@ -553,16 +579,17 @@
             // 
             // txtSearchAnimal
             // 
-            this.txtSearchAnimal.Location = new System.Drawing.Point(262, 82);
+            this.txtSearchAnimal.Location = new System.Drawing.Point(262, 84);
             this.txtSearchAnimal.Name = "txtSearchAnimal";
-            this.txtSearchAnimal.Size = new System.Drawing.Size(100, 20);
+            this.txtSearchAnimal.Size = new System.Drawing.Size(127, 20);
             this.txtSearchAnimal.TabIndex = 11;
             // 
             // buttonDeleteEnclosure
             // 
-            this.buttonDeleteEnclosure.Location = new System.Drawing.Point(360, 173);
+            this.buttonDeleteEnclosure.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonDeleteEnclosure.Location = new System.Drawing.Point(481, 173);
             this.buttonDeleteEnclosure.Name = "buttonDeleteEnclosure";
-            this.buttonDeleteEnclosure.Size = new System.Drawing.Size(212, 49);
+            this.buttonDeleteEnclosure.Size = new System.Drawing.Size(91, 49);
             this.buttonDeleteEnclosure.TabIndex = 10;
             this.buttonDeleteEnclosure.Text = "Удалить вольер";
             this.buttonDeleteEnclosure.UseVisualStyleBackColor = true;
@@ -582,44 +609,49 @@
             // label20
             // 
             this.label20.AutoSize = true;
+            this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.label20.Location = new System.Drawing.Point(0, 172);
             this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(113, 13);
+            this.label20.Size = new System.Drawing.Size(144, 16);
             this.label20.TabIndex = 8;
             this.label20.Text = "Животное в вольере";
             // 
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(3, 119);
+            this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label19.Location = new System.Drawing.Point(0, 116);
             this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(194, 13);
+            this.label19.Size = new System.Drawing.Size(251, 16);
             this.label19.TabIndex = 7;
             this.label19.Text = "Сотрудник ответственный за вольер";
             // 
             // label18
             // 
             this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(6, 66);
+            this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label18.Location = new System.Drawing.Point(0, 66);
             this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(114, 13);
+            this.label18.Size = new System.Drawing.Size(142, 16);
             this.label18.TabIndex = 6;
             this.label18.Text = "Корм который нужен";
             // 
             // label17
             // 
             this.label17.AutoSize = true;
+            this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.label17.Location = new System.Drawing.Point(6, 12);
             this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(74, 13);
+            this.label17.Size = new System.Drawing.Size(93, 16);
             this.label17.TabIndex = 5;
             this.label17.Text = "Вид вольера ";
             // 
             // buttonAddEnclosure
             // 
-            this.buttonAddEnclosure.Location = new System.Drawing.Point(202, 172);
+            this.buttonAddEnclosure.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonAddEnclosure.Location = new System.Drawing.Point(382, 173);
             this.buttonAddEnclosure.Name = "buttonAddEnclosure";
-            this.buttonAddEnclosure.Size = new System.Drawing.Size(138, 49);
+            this.buttonAddEnclosure.Size = new System.Drawing.Size(93, 49);
             this.buttonAddEnclosure.TabIndex = 4;
             this.buttonAddEnclosure.Text = "Добавить вольер";
             this.buttonAddEnclosure.UseVisualStyleBackColor = true;
@@ -627,22 +659,26 @@
             // 
             // comboBoxEnclosureAnimal
             // 
+            this.comboBoxEnclosureAnimal.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxEnclosureAnimal.FormattingEnabled = true;
             this.comboBoxEnclosureAnimal.Location = new System.Drawing.Point(0, 188);
             this.comboBoxEnclosureAnimal.Name = "comboBoxEnclosureAnimal";
             this.comboBoxEnclosureAnimal.Size = new System.Drawing.Size(196, 21);
             this.comboBoxEnclosureAnimal.TabIndex = 3;
+            this.comboBoxEnclosureAnimal.SelectedIndexChanged += new System.EventHandler(this.comboBoxEnclosureAnimal_SelectedIndexChanged);
             // 
             // comboBoxEnclosureWorker
             // 
+            this.comboBoxEnclosureWorker.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxEnclosureWorker.FormattingEnabled = true;
             this.comboBoxEnclosureWorker.Location = new System.Drawing.Point(3, 135);
             this.comboBoxEnclosureWorker.Name = "comboBoxEnclosureWorker";
-            this.comboBoxEnclosureWorker.Size = new System.Drawing.Size(196, 21);
+            this.comboBoxEnclosureWorker.Size = new System.Drawing.Size(248, 21);
             this.comboBoxEnclosureWorker.TabIndex = 2;
             // 
             // comboBoxEnclosureType
             // 
+            this.comboBoxEnclosureType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxEnclosureType.FormattingEnabled = true;
             this.comboBoxEnclosureType.Location = new System.Drawing.Point(6, 28);
             this.comboBoxEnclosureType.Name = "comboBoxEnclosureType";
@@ -653,7 +689,7 @@
             // 
             this.textBoxEnclosureFood.Location = new System.Drawing.Point(3, 82);
             this.textBoxEnclosureFood.Name = "textBoxEnclosureFood";
-            this.textBoxEnclosureFood.Size = new System.Drawing.Size(119, 20);
+            this.textBoxEnclosureFood.Size = new System.Drawing.Size(139, 20);
             this.textBoxEnclosureFood.TabIndex = 0;
             // 
             // tabPage3
@@ -687,6 +723,7 @@
             // 
             // buttonRefreshEmployees
             // 
+            this.buttonRefreshEmployees.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonRefreshEmployees.Location = new System.Drawing.Point(665, 310);
             this.buttonRefreshEmployees.Name = "buttonRefreshEmployees";
             this.buttonRefreshEmployees.Size = new System.Drawing.Size(168, 90);
@@ -697,6 +734,7 @@
             // 
             // comboBoxPosition
             // 
+            this.comboBoxPosition.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxPosition.FormattingEnabled = true;
             this.comboBoxPosition.Location = new System.Drawing.Point(0, 239);
             this.comboBoxPosition.Name = "comboBoxPosition";
@@ -705,9 +743,10 @@
             // 
             // ResetEmployeeSearch
             // 
-            this.ResetEmployeeSearch.Location = new System.Drawing.Point(742, 189);
+            this.ResetEmployeeSearch.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.ResetEmployeeSearch.Location = new System.Drawing.Point(752, 189);
             this.ResetEmployeeSearch.Name = "ResetEmployeeSearch";
-            this.ResetEmployeeSearch.Size = new System.Drawing.Size(78, 44);
+            this.ResetEmployeeSearch.Size = new System.Drawing.Size(81, 44);
             this.ResetEmployeeSearch.TabIndex = 17;
             this.ResetEmployeeSearch.Text = "Очистить поиск ";
             this.ResetEmployeeSearch.UseVisualStyleBackColor = true;
@@ -715,9 +754,10 @@
             // 
             // buttonSearchEmploye
             // 
+            this.buttonSearchEmploye.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonSearchEmploye.Location = new System.Drawing.Point(665, 189);
             this.buttonSearchEmploye.Name = "buttonSearchEmploye";
-            this.buttonSearchEmploye.Size = new System.Drawing.Size(71, 44);
+            this.buttonSearchEmploye.Size = new System.Drawing.Size(81, 44);
             this.buttonSearchEmploye.TabIndex = 16;
             this.buttonSearchEmploye.Text = "Поиск по фамилии";
             this.buttonSearchEmploye.UseVisualStyleBackColor = true;
@@ -732,9 +772,10 @@
             // 
             // buttonSave
             // 
-            this.buttonSave.Location = new System.Drawing.Point(549, 200);
+            this.buttonSave.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonSave.Location = new System.Drawing.Point(551, 181);
             this.buttonSave.Name = "buttonSave";
-            this.buttonSave.Size = new System.Drawing.Size(96, 59);
+            this.buttonSave.Size = new System.Drawing.Size(108, 78);
             this.buttonSave.TabIndex = 14;
             this.buttonSave.Text = "Сохранить изменения";
             this.buttonSave.UseVisualStyleBackColor = true;
@@ -742,9 +783,10 @@
             // 
             // buttonEditEmployee
             // 
-            this.buttonEditEmployee.Location = new System.Drawing.Point(458, 200);
+            this.buttonEditEmployee.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonEditEmployee.Location = new System.Drawing.Point(447, 181);
             this.buttonEditEmployee.Name = "buttonEditEmployee";
-            this.buttonEditEmployee.Size = new System.Drawing.Size(85, 59);
+            this.buttonEditEmployee.Size = new System.Drawing.Size(98, 79);
             this.buttonEditEmployee.TabIndex = 13;
             this.buttonEditEmployee.Text = "Изменить данные";
             this.buttonEditEmployee.UseVisualStyleBackColor = true;
@@ -752,6 +794,7 @@
             // 
             // buttonDeleteEmployee
             // 
+            this.buttonDeleteEmployee.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonDeleteEmployee.Location = new System.Drawing.Point(315, 200);
             this.buttonDeleteEmployee.Name = "buttonDeleteEmployee";
             this.buttonDeleteEmployee.Size = new System.Drawing.Size(126, 59);
@@ -774,50 +817,56 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(8, 223);
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label5.Location = new System.Drawing.Point(1, 220);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(65, 13);
+            this.label5.Size = new System.Drawing.Size(78, 16);
             this.label5.TabIndex = 10;
             this.label5.Text = "Должность";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 164);
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label4.Location = new System.Drawing.Point(1, 161);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(55, 13);
+            this.label4.Size = new System.Drawing.Size(71, 16);
             this.label4.TabIndex = 9;
             this.label4.Text = "Зарплата";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(3, 106);
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label3.Location = new System.Drawing.Point(3, 103);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(73, 13);
+            this.label3.Size = new System.Drawing.Size(91, 16);
             this.label3.TabIndex = 8;
             this.label3.Text = "Стаж работы";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(8, 58);
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label2.Location = new System.Drawing.Point(-1, 56);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(49, 13);
+            this.label2.Size = new System.Drawing.Size(62, 16);
             this.label2.TabIndex = 7;
             this.label2.Text = "Возраст";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(8, 17);
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label1.Location = new System.Drawing.Point(6, 14);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(96, 13);
+            this.label1.Size = new System.Drawing.Size(120, 16);
             this.label1.TabIndex = 6;
             this.label1.Text = "ФИО Сотрудника";
             // 
             // buttonAddEmployee
             // 
+            this.buttonAddEmployee.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonAddEmployee.Location = new System.Drawing.Point(161, 200);
             this.buttonAddEmployee.Name = "buttonAddEmployee";
             this.buttonAddEmployee.Size = new System.Drawing.Size(148, 59);
@@ -890,18 +939,19 @@
             // textBoxDescriptionView
             // 
             this.textBoxDescriptionView.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBoxDescriptionView.Location = new System.Drawing.Point(582, 232);
+            this.textBoxDescriptionView.Location = new System.Drawing.Point(479, 232);
             this.textBoxDescriptionView.Multiline = true;
             this.textBoxDescriptionView.Name = "textBoxDescriptionView";
             this.textBoxDescriptionView.ReadOnly = true;
-            this.textBoxDescriptionView.Size = new System.Drawing.Size(276, 212);
+            this.textBoxDescriptionView.Size = new System.Drawing.Size(390, 212);
             this.textBoxDescriptionView.TabIndex = 11;
             // 
             // button1save
             // 
-            this.button1save.Location = new System.Drawing.Point(501, 160);
+            this.button1save.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.button1save.Location = new System.Drawing.Point(479, 162);
             this.button1save.Name = "button1save";
-            this.button1save.Size = new System.Drawing.Size(75, 65);
+            this.button1save.Size = new System.Drawing.Size(109, 65);
             this.button1save.TabIndex = 10;
             this.button1save.Text = "Cохранить изменения";
             this.button1save.UseVisualStyleBackColor = true;
@@ -909,9 +959,10 @@
             // 
             // buttonEditData
             // 
-            this.buttonEditData.Location = new System.Drawing.Point(422, 162);
+            this.buttonEditData.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonEditData.Location = new System.Drawing.Point(378, 163);
             this.buttonEditData.Name = "buttonEditData";
-            this.buttonEditData.Size = new System.Drawing.Size(73, 63);
+            this.buttonEditData.Size = new System.Drawing.Size(95, 63);
             this.buttonEditData.TabIndex = 9;
             this.buttonEditData.Text = "Изменить";
             this.buttonEditData.UseVisualStyleBackColor = true;
@@ -919,7 +970,8 @@
             // 
             // buttonDeleteService
             // 
-            this.buttonDeleteService.Location = new System.Drawing.Point(297, 161);
+            this.buttonDeleteService.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonDeleteService.Location = new System.Drawing.Point(264, 160);
             this.buttonDeleteService.Name = "buttonDeleteService";
             this.buttonDeleteService.Size = new System.Drawing.Size(97, 65);
             this.buttonDeleteService.TabIndex = 8;
@@ -930,27 +982,30 @@
             // label23
             // 
             this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(19, 168);
+            this.label23.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label23.Location = new System.Drawing.Point(20, 163);
             this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(69, 13);
+            this.label23.Size = new System.Drawing.Size(100, 20);
             this.label23.TabIndex = 7;
             this.label23.Text = "Цена услуги";
             // 
             // label22
             // 
             this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(19, 71);
+            this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label22.Location = new System.Drawing.Point(20, 64);
             this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(93, 13);
+            this.label22.Size = new System.Drawing.Size(135, 20);
             this.label22.TabIndex = 6;
             this.label22.Text = "Описание услуги";
             // 
             // label21
             // 
             this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(19, 24);
+            this.label21.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label21.Location = new System.Drawing.Point(18, 17);
             this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(93, 13);
+            this.label21.Size = new System.Drawing.Size(135, 20);
             this.label21.TabIndex = 5;
             this.label21.Text = "Название услуги";
             // 
@@ -962,12 +1017,13 @@
             this.dataGridViewServices.Location = new System.Drawing.Point(8, 232);
             this.dataGridViewServices.Name = "dataGridViewServices";
             this.dataGridViewServices.ReadOnly = true;
-            this.dataGridViewServices.Size = new System.Drawing.Size(568, 212);
+            this.dataGridViewServices.Size = new System.Drawing.Size(465, 212);
             this.dataGridViewServices.TabIndex = 4;
             // 
             // buttonAddService
             // 
-            this.buttonAddService.Location = new System.Drawing.Point(182, 161);
+            this.buttonAddService.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonAddService.Location = new System.Drawing.Point(161, 161);
             this.buttonAddService.Name = "buttonAddService";
             this.buttonAddService.Size = new System.Drawing.Size(97, 65);
             this.buttonAddService.TabIndex = 3;
@@ -1035,21 +1091,50 @@
             this.tabPage5.Text = "Билеты";
             this.tabPage5.UseVisualStyleBackColor = true;
             // 
+            // label36
+            // 
+            this.label36.AutoSize = true;
+            this.label36.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label36.Location = new System.Drawing.Point(297, 270);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(144, 16);
+            this.label36.TabIndex = 28;
+            this.label36.Text = "Введите месяц (1-12):";
+            // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label35.Location = new System.Drawing.Point(299, 228);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(136, 16);
+            this.label35.TabIndex = 27;
+            this.label35.Text = "Введите день (1-31):";
+            // 
+            // txtSearchMonth
+            // 
+            this.txtSearchMonth.Location = new System.Drawing.Point(302, 289);
+            this.txtSearchMonth.Name = "txtSearchMonth";
+            this.txtSearchMonth.Size = new System.Drawing.Size(54, 20);
+            this.txtSearchMonth.TabIndex = 26;
+            // 
             // label32
             // 
             this.label32.AutoSize = true;
-            this.label32.Location = new System.Drawing.Point(692, 270);
+            this.label32.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label32.Location = new System.Drawing.Point(688, 270);
             this.label32.Name = "label32";
-            this.label32.Size = new System.Drawing.Size(100, 13);
+            this.label32.Size = new System.Drawing.Size(128, 16);
             this.label32.TabIndex = 25;
             this.label32.Text = "Введите фамилию";
             // 
             // label30
             // 
             this.label30.AutoSize = true;
-            this.label30.Location = new System.Drawing.Point(585, 270);
+            this.label30.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label30.Location = new System.Drawing.Point(580, 270);
             this.label30.Name = "label30";
-            this.label30.Size = new System.Drawing.Size(72, 13);
+            this.label30.Size = new System.Drawing.Size(90, 16);
             this.label30.TabIndex = 24;
             this.label30.Text = "Введите имя";
             // 
@@ -1078,6 +1163,7 @@
             // 
             // buttonPoisk
             // 
+            this.buttonPoisk.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonPoisk.Location = new System.Drawing.Point(624, 212);
             this.buttonPoisk.Name = "buttonPoisk";
             this.buttonPoisk.Size = new System.Drawing.Size(100, 55);
@@ -1098,6 +1184,7 @@
             // 
             // buttonCreateTicket
             // 
+            this.buttonCreateTicket.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonCreateTicket.Location = new System.Drawing.Point(63, 357);
             this.buttonCreateTicket.Name = "buttonCreateTicket";
             this.buttonCreateTicket.Size = new System.Drawing.Size(155, 60);
@@ -1134,54 +1221,60 @@
             // label29
             // 
             this.label29.AutoSize = true;
-            this.label29.Location = new System.Drawing.Point(621, 405);
+            this.label29.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label29.Location = new System.Drawing.Point(621, 403);
             this.label29.Name = "label29";
-            this.label29.Size = new System.Drawing.Size(117, 13);
+            this.label29.Size = new System.Drawing.Size(146, 16);
             this.label29.TabIndex = 14;
             this.label29.Text = "Фамилия покупателя";
             // 
             // label28
             // 
             this.label28.AutoSize = true;
-            this.label28.Location = new System.Drawing.Point(499, 404);
+            this.label28.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label28.Location = new System.Drawing.Point(455, 403);
             this.label28.Name = "label28";
-            this.label28.Size = new System.Drawing.Size(90, 13);
+            this.label28.Size = new System.Drawing.Size(113, 16);
             this.label28.TabIndex = 13;
             this.label28.Text = "Имя покупателя";
             // 
             // label27
             // 
             this.label27.AutoSize = true;
-            this.label27.Location = new System.Drawing.Point(221, 405);
+            this.label27.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label27.Location = new System.Drawing.Point(221, 402);
             this.label27.Name = "label27";
-            this.label27.Size = new System.Drawing.Size(147, 13);
+            this.label27.Size = new System.Drawing.Size(189, 16);
             this.label27.TabIndex = 12;
             this.label27.Text = "Сотрудник выдавший билет";
             // 
             // label26
             // 
             this.label26.AutoSize = true;
-            this.label26.Location = new System.Drawing.Point(621, 365);
+            this.label26.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label26.Location = new System.Drawing.Point(621, 363);
             this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(77, 13);
+            this.label26.Size = new System.Drawing.Size(96, 16);
             this.label26.TabIndex = 11;
             this.label26.Text = "Дата покупки";
             // 
             // label25
             // 
             this.label25.AutoSize = true;
-            this.label25.Location = new System.Drawing.Point(490, 365);
+            this.label25.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label25.Location = new System.Drawing.Point(486, 363);
             this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(99, 13);
+            this.label25.Size = new System.Drawing.Size(120, 16);
             this.label25.TabIndex = 10;
             this.label25.Text = "Общая стоимость";
             // 
             // label24
             // 
             this.label24.AutoSize = true;
+            this.label24.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.label24.Location = new System.Drawing.Point(221, 366);
             this.label24.Name = "label24";
-            this.label24.Size = new System.Drawing.Size(43, 13);
+            this.label24.Size = new System.Drawing.Size(53, 16);
             this.label24.TabIndex = 9;
             this.label24.Text = "Услуги";
             // 
@@ -1210,7 +1303,7 @@
             // 
             this.txtTotalCost.Location = new System.Drawing.Point(489, 381);
             this.txtTotalCost.Name = "txtTotalCost";
-            this.txtTotalCost.Size = new System.Drawing.Size(100, 20);
+            this.txtTotalCost.Size = new System.Drawing.Size(121, 20);
             this.txtTotalCost.TabIndex = 4;
             // 
             // txtServices
@@ -1222,9 +1315,10 @@
             // 
             // buttonFinishEditing
             // 
+            this.buttonFinishEditing.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonFinishEditing.Location = new System.Drawing.Point(8, 171);
             this.buttonFinishEditing.Name = "buttonFinishEditing";
-            this.buttonFinishEditing.Size = new System.Drawing.Size(114, 82);
+            this.buttonFinishEditing.Size = new System.Drawing.Size(130, 73);
             this.buttonFinishEditing.TabIndex = 2;
             this.buttonFinishEditing.Text = "Завершить редактирование выбранного билета";
             this.buttonFinishEditing.UseVisualStyleBackColor = true;
@@ -1232,6 +1326,7 @@
             // 
             // buttonDeleteTicket
             // 
+            this.buttonDeleteTicket.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonDeleteTicket.Location = new System.Drawing.Point(63, 423);
             this.buttonDeleteTicket.Name = "buttonDeleteTicket";
             this.buttonDeleteTicket.Size = new System.Drawing.Size(155, 61);
@@ -1246,8 +1341,10 @@
             this.dataGridViewTickets.AllowUserToDeleteRows = false;
             this.dataGridViewTickets.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewTickets.Location = new System.Drawing.Point(6, 15);
+            this.dataGridViewTickets.MultiSelect = false;
             this.dataGridViewTickets.Name = "dataGridViewTickets";
             this.dataGridViewTickets.ReadOnly = true;
+            this.dataGridViewTickets.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridViewTickets.Size = new System.Drawing.Size(814, 150);
             this.dataGridViewTickets.TabIndex = 0;
             this.dataGridViewTickets.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewTickets_CellClick);
@@ -1266,6 +1363,7 @@
             // 
             // buttonRefreshArchive
             // 
+            this.buttonRefreshArchive.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonRefreshArchive.Location = new System.Drawing.Point(8, 364);
             this.buttonRefreshArchive.Name = "buttonRefreshArchive";
             this.buttonRefreshArchive.Size = new System.Drawing.Size(145, 77);
@@ -1284,30 +1382,13 @@
             this.dataGridViewArchive.Size = new System.Drawing.Size(833, 355);
             this.dataGridViewArchive.TabIndex = 0;
             // 
-            // txtSearchMonth
+            // textBoxAnimalType
             // 
-            this.txtSearchMonth.Location = new System.Drawing.Point(302, 289);
-            this.txtSearchMonth.Name = "txtSearchMonth";
-            this.txtSearchMonth.Size = new System.Drawing.Size(147, 20);
-            this.txtSearchMonth.TabIndex = 26;
-            // 
-            // label35
-            // 
-            this.label35.AutoSize = true;
-            this.label35.Location = new System.Drawing.Point(299, 231);
-            this.label35.Name = "label35";
-            this.label35.Size = new System.Drawing.Size(109, 13);
-            this.label35.TabIndex = 27;
-            this.label35.Text = "Введите день (1-31):";
-            // 
-            // label36
-            // 
-            this.label36.AutoSize = true;
-            this.label36.Location = new System.Drawing.Point(299, 273);
-            this.label36.Name = "label36";
-            this.label36.Size = new System.Drawing.Size(117, 13);
-            this.label36.TabIndex = 28;
-            this.label36.Text = "Введите месяц (1-12):";
+            this.textBoxAnimalType.Location = new System.Drawing.Point(214, 189);
+            this.textBoxAnimalType.Name = "textBoxAnimalType";
+            this.textBoxAnimalType.ReadOnly = true;
+            this.textBoxAnimalType.Size = new System.Drawing.Size(148, 20);
+            this.textBoxAnimalType.TabIndex = 18;
             // 
             // AdminForm
             // 
@@ -1457,5 +1538,6 @@
         private System.Windows.Forms.TextBox txtSearchMonth;
         private System.Windows.Forms.Label label36;
         private System.Windows.Forms.Label label35;
+        private System.Windows.Forms.TextBox textBoxAnimalType;
     }
 }

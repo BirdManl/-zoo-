@@ -117,7 +117,7 @@ namespace АИС_зоопарк
                 using (SQLiteConnection connection = new SQLiteConnection(connectionString))
                 {
                     connection.Open();
-                    string query = "SELECT Масса, Высота, Возраст, Пол, [Страна обитания] FROM Животные WHERE [Номер ветеринарной карты] = @animalId";
+                    string query = "SELECT Масса, Высота, Возраст, Пол, [Страна обитания], Класс FROM Животные WHERE [Номер ветеринарной карты] = @animalId";
                     using (SQLiteCommand command = new SQLiteCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@animalId", selectedAnimal.Id);
@@ -130,9 +130,11 @@ namespace АИС_зоопарк
                                 int age = reader.GetInt32(reader.GetOrdinal("Возраст"));
                                 string gender = reader["Пол"].ToString();
                                 string country = reader["Страна обитания"].ToString();
+                                string animalClass = reader["Класс"].ToString();
 
                                 // Отображаем информацию в label1
                                 labelAnimalInfo.Text = $"Кличка: {selectedAnimal.Name}\n" +
+                                                       $"Класс: {animalClass}\n" +
                                                        $"Масса: {weight} кг\n" +
                                                        $"Высота: {height} см\n" +
                                                        $"Возраст: {age} лет\n" +
@@ -152,6 +154,7 @@ namespace АИС_зоопарк
                 MessageBox.Show("Ошибка при загрузке информации о животном: " + ex.Message);
             }
         }
+
 
         // Вспомогательный класс для хранения данных об услугах
         private class ServiceItem
