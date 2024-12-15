@@ -60,6 +60,7 @@
             this.textBoxCountry = new System.Windows.Forms.TextBox();
             this.textBoxAnimalName = new System.Windows.Forms.TextBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.textBoxAnimalType = new System.Windows.Forms.TextBox();
             this.label33 = new System.Windows.Forms.Label();
             this.buttonRefreshEnclosures = new System.Windows.Forms.Button();
             this.buttonSaveEnclosureChanges = new System.Windows.Forms.Button();
@@ -144,7 +145,6 @@
             this.tabPage6 = new System.Windows.Forms.TabPage();
             this.buttonRefreshArchive = new System.Windows.Forms.Button();
             this.dataGridViewArchive = new System.Windows.Forms.DataGridView();
-            this.textBoxAnimalType = new System.Windows.Forms.TextBox();
             this.tabPageHistory.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewAnimals)).BeginInit();
@@ -515,6 +515,14 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Вольеры";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // textBoxAnimalType
+            // 
+            this.textBoxAnimalType.Location = new System.Drawing.Point(214, 189);
+            this.textBoxAnimalType.Name = "textBoxAnimalType";
+            this.textBoxAnimalType.ReadOnly = true;
+            this.textBoxAnimalType.Size = new System.Drawing.Size(148, 20);
+            this.textBoxAnimalType.TabIndex = 18;
             // 
             // label33
             // 
@@ -1379,16 +1387,8 @@
             this.dataGridViewArchive.Location = new System.Drawing.Point(3, 3);
             this.dataGridViewArchive.Name = "dataGridViewArchive";
             this.dataGridViewArchive.ReadOnly = true;
-            this.dataGridViewArchive.Size = new System.Drawing.Size(833, 355);
+            this.dataGridViewArchive.Size = new System.Drawing.Size(808, 355);
             this.dataGridViewArchive.TabIndex = 0;
-            // 
-            // textBoxAnimalType
-            // 
-            this.textBoxAnimalType.Location = new System.Drawing.Point(214, 189);
-            this.textBoxAnimalType.Name = "textBoxAnimalType";
-            this.textBoxAnimalType.ReadOnly = true;
-            this.textBoxAnimalType.Size = new System.Drawing.Size(148, 20);
-            this.textBoxAnimalType.TabIndex = 18;
             // 
             // AdminForm
             // 
